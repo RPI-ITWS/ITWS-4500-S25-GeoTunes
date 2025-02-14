@@ -1,0 +1,20 @@
+:root {
+    --primary-bg: #F5E6D3;
+    --primary-text: #2A2A2A;
+    --coral-pink: #FF6B6B;
+    --mustard-yellow: #FFD93D;
+    --navy-blue: #1A365D;
+    --emerald-green: #2E7D32;
+    --error-red: #DC3545;
+    --success-green: #28A745;
+    --border-color: rgba(42, 42, 42, 0.1);
+    --button-font: 'Montserrat', sans-serif;
+    --transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    margin: 0;
+    font-family: var(--button-font);
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+}

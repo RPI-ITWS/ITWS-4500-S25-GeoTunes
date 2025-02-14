@@ -1,0 +1,36 @@
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.auth-form-wrapper {
+    background: #fff;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: float 4s ease-in-out infinite;
+}
+
+.error-banner {
+    background-color: var(--error-red);
+    color: #fff;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+/* Floating animation for the auth form wrapper */
+@keyframes float {
+    0% {
+    transform: translateY(0);
+    }
+    50% {
+    transform: translateY(-5px);
+    }
+    100% {
+    transform: translateY(0);
+    }
+}
