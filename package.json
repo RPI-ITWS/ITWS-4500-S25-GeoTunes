@@ -1,0 +1,24 @@
+{
+  "name": "geotunes",
+  "version": "1.0.0",
+  "description": "Website for Sharing Local Vibes",
+  "homepage": "https://github.com/RPI-ITWS/ITWS-4500-S25-GeoTunes#readme",
+  "bugs": {
+    "url": "https://github.com/RPI-ITWS/ITWS-4500-S25-GeoTunes/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RPI-ITWS/ITWS-4500-S25-GeoTunes.git"
+  },
+  "license": "ISC",
+  "author": "GeoTunes Corporation",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongo": "^0.1.0"
+  }
+}
