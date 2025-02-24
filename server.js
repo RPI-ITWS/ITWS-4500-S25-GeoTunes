@@ -12,6 +12,49 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+async function spotifyRequest() {
+  let key = getKey();
+  let data = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+    headers: {
+      "Authorization": `Bearer  ${key}`,
+    }
+  });
+  if (data["error"]["message"] === "The access token expired") {
+    key = await newKey();
+    data = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+      headers: {
+        "Authorization": `Bearer  ${key}`,
+      }
+    });
+  }
+  return data;
+}
+
+
+// gets a new key from spotify, places it into the database, and then returns the value
+async function newKey() {
+  let key = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    body: "grant_type=client_credentials&client_id=b931d26ffacd40e1bb2a85ff3b82df0e&client_secret=1841d9b707d445d0b4ca9821981c0cc8",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+  const db = client.db("geotunes");
+  const collection = db.collection('api_data');
+  collection.dropIndexes();
+  collection.insertOne({ "key": key });
+  return key["access_token"];
+}
+
+async function getKey() {
+  const db = client.db("geotunes");
+  const collection = db.collection('api_data');
+  const key = await collection.findOne({}, { projection: { key: 1, _id: 0 } });
+  return key["key"];
+}
+
 async function run() {
   console.log("running");
   try {
@@ -25,10 +68,9 @@ async function run() {
     console.error("Error:", error);
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
-    console.log("ending");
   }
 }
+
 run().catch(console.dir);
 
 app.use(express.static('public'))
@@ -37,6 +79,9 @@ app.get('/locale/:locale', (req, res) => {
 })
 
 app.post('/locale/:locale', (req, res) => {
+  const db = client.db("geotunes");
+  const collection = db.collection("api_data");
+  const key = collection.find("key");
 })
 
 app.put('/locale/:locale', (req, res) => {
