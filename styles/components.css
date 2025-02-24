@@ -1,4 +1,3 @@
-/* Button Styles */
 button {
     font-family: var(--button-font);
     background-color: var(--navy-blue);
@@ -15,7 +14,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Loading Dots Animation */
 .loading-dots span {
     display: inline-block;
     animation: blink 1.4s infinite;
@@ -32,7 +30,6 @@ button:disabled {
     }
 }
 
-/* Input Field Styles */
 .input-field {
     display: flex;
     flex-direction: column;
@@ -53,16 +50,4 @@ button:disabled {
 .input-field input:focus {
     outline: 2px solid var(--navy-blue);
     outline-offset: 2px;
-}
-
-/* Screen Reader Only */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
 }
