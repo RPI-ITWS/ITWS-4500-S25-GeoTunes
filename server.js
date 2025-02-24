@@ -14,19 +14,22 @@ const client = new MongoClient(uri, {
 });
 
 async function spotifyRequest() {
-  let key = getKey();
-  let data = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+  let key = await getKey();
+  let response = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
     headers: {
       "Authorization": `Bearer  ${key}`,
     }
   });
-  if (data["error"]["message"] === "The access token expired") {
+  let data = await response.json();
+  console.log(data);
+  if (data?.error?.message === "The access token expired") {
     key = await newKey();
-    data = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+    response = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
       headers: {
         "Authorization": `Bearer  ${key}`,
       }
     });
+    data = await response.json();
   }
   return data;
 }
@@ -41,17 +44,20 @@ async function newKey() {
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
+  key = await key.json();
   const db = client.db("geotunes");
   const collection = db.collection('api_data');
-  collection.dropIndexes();
-  collection.insertOne({ "key": key });
-  return key["access_token"];
+  await collection.deleteMany({});
+  await collection.insertOne({ "key": key.access_token, "created_at": new Date() });
+  console.log("New key:", key);
+  return key.access_token;
 }
 
 async function getKey() {
   const db = client.db("geotunes");
   const collection = db.collection('api_data');
   const key = await collection.findOne({}, { projection: { key: 1, _id: 0 } });
+  console.log("key", key);
   return key["key"];
 }
 
@@ -78,16 +84,22 @@ app.use(express.static('public'))
 app.get('/locale/:locale', (req, res) => {
 })
 
-app.post('/locale/:locale', (req, res) => {
+app.post('/locale/:locale', async (req, res) => {
   const db = client.db("geotunes");
   const collection = db.collection("api_data");
-  const key = collection.find("key");
+  const key = await collection.find("key");
+  let data = await (spotifyRequest());
+  console.log(data);
 })
 
 app.put('/locale/:locale', (req, res) => {
 })
 
 app.delete('/locale/:locale', (req, res) => {
+})
+
+app.get('/newkey', async (req, res) => {
+  await newKey();
 })
 
 app.listen(port, () => {
