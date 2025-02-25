@@ -251,7 +251,7 @@ function CityExplorationApp() {
         }
         }, "Add to Playlist"),
         React.createElement("a", {
-        href: "/reviewPage/reviewPage.html",
+        href: "/Reviews/reviewPage.html",
         style: {
             display: "inline-block",
             padding: "0.75rem 1.5rem",
