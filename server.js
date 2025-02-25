@@ -1,6 +1,9 @@
 const express = require('express')
 const app = express()
 const port = 3000
+const cors = require("cors")
+
+app.use(cors())
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -34,6 +37,26 @@ async function spotifyRequest() {
   return data;
 }
 
+async function playlistRequest(id) {
+  let key = await getKey();
+  let response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
+    headers: {
+      "Authorization": `Bearer  ${key}`,
+    }
+  });
+  let data = await response.json();
+  console.log(data);
+  if (data?.error?.message === "The access token expired") {
+    key = await newKey();
+    response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
+      headers: {
+        "Authorization": `Bearer  ${key}`,
+      }
+    });
+    data = await response.json();
+  }
+  return data;
+}
 
 // gets a new key from spotify, places it into the database, and then returns the value
 async function newKey() {
@@ -82,6 +105,13 @@ run().catch(console.dir);
 app.use(express.static('public'))
 
 app.get('/locale/:locale', (req, res) => {
+})
+
+app.get('/playlist/', async (req, res) => {
+  let city = req.query.city;
+  let id = "6UR7T05u7cIsNAuqUE6UV0";
+  data = await playlistRequest(id);
+  res.json(data);
 })
 
 app.post('/locale/:locale', async (req, res) => {
