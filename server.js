@@ -130,10 +130,12 @@ app.post('/users', (req, res) => {
   const db = client.db("geotunes");
   const collection = db.collection("users");
   const body = req.body;
+  console.log(body);
   const name = body.name;
-  const spotifyId = body.spotifyId;
+  const spotifyId = body.spotify_id;
   const password = body.password;
-  collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password })
+  collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password });
+  console.log("added user");
 })
 
 // Serve "Add a Song" HTML page
