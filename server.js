@@ -105,7 +105,7 @@ run().catch(console.dir);
 
 // Middleware
 app.use(express.static('public'));
-app.use(bodyParser.json()); 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Temporary in-memory storage (replace with MongoDB later)
@@ -126,46 +126,50 @@ app.post('/locale/:locale', async (req, res) => {
   console.log(data);
 })
 
+app.post('/users', (req, res) => {
+  const db = client.db("geotunes");
+  const collection = db.collection("users");
+  const body = req.body;
+  const name = body.name;
+  const spotifyId = body.spotifyId;
+  const password = body.password;
+  collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password })
+})
+
 // Serve "Add a Song" HTML page
 app.get('/add-song', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
+  res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
 });
 
 
 // Handle song submission
 app.post('/add-song', (req, res) => {
-    const { title, artist } = req.body;
-    if (title && artist) {
-        songs.push({ title, artist });
-        res.status(201).send({ message: "Song added successfully!" });
-    } else {
-        res.status(400).send({ error: "Invalid song data" });
-    }
+  const { title, artist } = req.body;
+  if (title && artist) {
+    songs.push({ title, artist });
+    res.status(201).send({ message: "Song added successfully!" });
+  } else {
+    res.status(400).send({ error: "Invalid song data" });
+  }
 });
 
 // Get playlist (for frontend)
 app.get('/get-songs', (req, res) => {
-    res.json(songs);
+  res.json(songs);
 });
 
 app.get('/newkey', async (req, res) => {
   await newKey();
 })
 
-app.listen(port, () => {
-  console.log('Listening on *:3000')
-})
-
 // Existing Locale Routes (unchanged)
-app.get('/locale/:locale', (req, res) => {});
+app.get('/locale/:locale', (req, res) => { });
 
-app.post('/locale/:locale', (req, res) => {});
+app.put('/locale/:locale', (req, res) => { });
 
-app.put('/locale/:locale', (req, res) => {});
-
-app.delete('/locale/:locale', (req, res) => {});
+app.delete('/locale/:locale', (req, res) => { });
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Listening on http://localhost:${port}`);
+  console.log(`Listening on http://localhost:${port}`);
 });
