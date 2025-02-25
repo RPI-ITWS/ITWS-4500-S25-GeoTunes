@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 // Import the "Add a Song" routes
-const addSongRoutes = require('./user-auth/routes/addSongRoutes');
+const addSongRoutes = require('./routes/addSongRoutes');
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
