@@ -19,7 +19,6 @@ body {
     color: var(--primary-text);
     font-family: 'Oleo Script';
     min-height: 100vh;
-    color: #ffffff;
 }
 
 html, body {
@@ -33,4 +32,9 @@ html, body {
     display: flex;
     flex-direction: column;
     margin-top: 70px;
+}
+
+button a {
+    text-decoration: none; 
+    color: #ffffff;
 }
