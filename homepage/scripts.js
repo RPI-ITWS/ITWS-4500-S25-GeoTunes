@@ -1,17 +1,17 @@
 'use strict';
 
-function Navbar() {
-  return React.createElement(
-    'nav',
-    { className: 'navbar' },
-    React.createElement('div', { className: 'logo' }, 'LOGO'),
-    React.createElement(
-      'a',
-      { className: 'login-link', href: '#login' },
-      'LOGIN/SIGN UP'
-    )
-  );
-}
+// function Navbar() {
+//   return React.createElement(
+//     'nav',
+//     { className: 'navbar' },
+//     React.createElement('div', { className: 'logo' }, 'LOGO'),
+//     React.createElement(
+//       'a',
+//       { className: 'login-link', href: '#login' },
+//       'LOGIN/SIGN UP'
+//     )
+//   );
+// }
 
 function MainContent() {
   return React.createElement(
@@ -42,7 +42,7 @@ root.render(
   React.createElement(
     React.Fragment,
     null,
-    React.createElement(Navbar),
+    // React.createElement(Navbar),
     React.createElement(MainContent)
   )
 );
