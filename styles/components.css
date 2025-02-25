@@ -20,16 +20,6 @@ button:disabled {
     margin: 0 2px;
 }
 
-@keyframes blink {
-    0%,
-    100% {
-    opacity: 0.2;
-    }
-    50% {
-    opacity: 1;
-    }
-}
-
 .input-field {
     display: flex;
     flex-direction: column;

@@ -4,19 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GeoTunes - Login</title>
-    <link rel="stylesheet" href="styles/global.css" />
-    <link rel="stylesheet" href="styles/auth.css" />
-    <link rel="stylesheet" href="styles/components.css" />
+    <link rel="stylesheet" href="/styles/global.css" />
+    <link rel="stylesheet" href="/styles/auth.css" />
+    <link rel="stylesheet" href="/styles/components.css" />
 </head>
 <body>
-    <header>
-        <img src="assets/images/logo.svg" alt="GeoTunes Logo" style="height:50px;" />
-    </header>
+    <div id="header-root"></div>
     <main>
         <div class="auth-container">
         <div class="auth-form-wrapper">
             <h1>Welcome Back</h1>
-            <!-- ARIA live region for general errors -->
             <div id="error-banner" role="alert" aria-live="assertive" class="error-banner" style="display:none;"></div>
             <form id="login-form">
             <div class="input-field">
@@ -35,13 +32,13 @@
         </div>
         </div>
     </main>
-    <footer>
-        <p>&copy; 2025 GeoTunes</p>
-    </footer>
-    <!-- Include scripts as ES modules -->
+    <div id="footer-root"></div>
     <script type="module" src="scripts/api.js"></script>
     <script type="module" src="scripts/validation.js"></script>
     <script type="module" src="scripts/authHelpers.js"></script>
     <script type="module" src="scripts/login.js"></script>
+    <script type="module" src="/headerFooter/headerFooter.js"></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: float 4s ease-in-out infinite;
+    width: 40%;
 }
 
 .error-banner {
@@ -20,17 +20,4 @@
     padding: 0.5rem;
     margin-bottom: 1rem;
     border-radius: 4px;
-}
-
-/* Floating animation for the auth form wrapper */
-@keyframes float {
-    0% {
-    transform: translateY(0);
-    }
-    50% {
-    transform: translateY(-5px);
-    }
-    100% {
-    transform: translateY(0);
-    }
 }
