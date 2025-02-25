@@ -5,8 +5,13 @@ const cors = require("cors")
 const path = require('path');
 const bodyParser = require('body-parser');
 
-app.use(cors())
-
+// dangerous, must change in production
+app.use(cors({
+  origin: "*", // Allows any origin
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allows all HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allows common headers
+  credentials: true // Allows cookies, authentication headers, etc.
+}));
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -18,6 +23,8 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+const db = client.db("geotunes");
 
 async function spotifyRequest() {
   let key = await getKey();
@@ -71,7 +78,6 @@ async function newKey() {
     },
   });
   key = await key.json();
-  const db = client.db("geotunes");
   const collection = db.collection('api_data');
   await collection.deleteMany({});
   await collection.insertOne({ "key": key.access_token, "created_at": new Date() });
@@ -80,7 +86,6 @@ async function newKey() {
 }
 
 async function getKey() {
-  const db = client.db("geotunes");
   const collection = db.collection('api_data');
   const key = await collection.findOne({}, { projection: { key: 1, _id: 0 } });
   console.log("key", key);
@@ -119,15 +124,13 @@ app.get('/playlist/', async (req, res) => {
 })
 
 app.post('/locale/:locale', async (req, res) => {
-  const db = client.db("geotunes");
   const collection = db.collection("api_data");
-  const key = await collection.find("key");
   let data = await (spotifyRequest());
   console.log(data);
 })
 
 app.post('/users', (req, res) => {
-  const db = client.db("geotunes");
+  console.log("User Post Request");
   const collection = db.collection("users");
   const body = req.body;
   console.log(body);
@@ -136,6 +139,7 @@ app.post('/users', (req, res) => {
   const password = body.password;
   collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password });
   console.log("added user");
+  res.json({ "success": true })
 })
 
 // Serve "Add a Song" HTML page
