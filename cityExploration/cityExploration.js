@@ -1,3 +1,4 @@
+
 function CityExplorationApp() {
     var _a = React.useState(""), city = _a[0], setCity = _a[1];
     var _b = React.useState(""), currentCity = _b[0], setCurrentCity = _b[1];
@@ -9,7 +10,7 @@ function CityExplorationApp() {
 
     React.useEffect(function () {
     if (!mapInitialized) {
-        var defaultCoords = [51.505, -0.09]; // fallback: London
+        var defaultCoords = [42.729996, -73.681763]; 
         var map = L.map("map").setView(defaultCoords, 13);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
@@ -99,7 +100,7 @@ function CityExplorationApp() {
         fetch("/node/spotify?city=" + encodeURIComponent(cityName))
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: Replace fake data with your actual Spotify playlist from the database.
+            // TODO: Replace with  actual Spotify playlist from the database.
             setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><p>" +
             (data.playlist || "No playlist available.") + "</p>");
         })
@@ -111,7 +112,7 @@ function CityExplorationApp() {
         fetch("/node/info?city=" + encodeURIComponent(cityName))
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: Replace fake data with actual city information from the database.
+            // TODO: Replace with actual city information from the database.
             setTabContent("<h4>Information about " + cityName + "</h4><p>" +
             (data.info || "No information available.") + "</p>");
         })
@@ -123,7 +124,7 @@ function CityExplorationApp() {
         fetch("/node/events?city=" + encodeURIComponent(cityName))
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: Replace fake data with actual events from the database.
+            // TODO: Replace with actual events from the database.
             setTabContent("<h4>Events in " + cityName + "</h4><p>" +
             (data.events || "No events available.") + "</p>");
         })
@@ -164,6 +165,7 @@ function CityExplorationApp() {
     return React.createElement(
     "div",
     { className: "container", style: { width: "90%", margin: "0 auto" } },
+    // Search Bar
     React.createElement(
         "div",
         { className: "search-bar", style: { textAlign: "center", margin: "20px 0" } },
@@ -185,12 +187,11 @@ function CityExplorationApp() {
         "div",
         {
         className: "city-content-container",
-        style: { display: "flex", justifyContent: "space-between", marginBottom: "20px" },
+        style: { display: "flex", justifyContent: "space-between", marginBottom: "20px"},
         },
         React.createElement(
         "div",
         { className: "map-section", style: { flex: 1, marginRight: "10px" } },
-        React.createElement("h3", { style: { textAlign: "center" } }, "Map"),
         React.createElement("div", { id: "map", style: { height: "300px", backgroundColor: "#ddd" } })
         ),
         React.createElement(
@@ -233,6 +234,34 @@ function CityExplorationApp() {
             dangerouslySetInnerHTML: { __html: tabContent },
         })
         )
+    ),
+    React.createElement(
+        "div",
+        { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
+        React.createElement("a", {
+        href: "addSong.html",
+        style: {
+            display: "inline-block",
+            padding: "0.75rem 1.5rem",
+            backgroundColor: "#1A365D",
+            color: "#fff",
+            borderRadius: "4px",
+            margin: "0 10px",
+            textDecoration: "none"
+        }
+        }, "Add to Playlist"),
+        React.createElement("a", {
+        href: "/reviewPage/reviewPage.html",
+        style: {
+            display: "inline-block",
+            padding: "0.75rem 1.5rem",
+            backgroundColor: "#1A365D",
+            color: "#fff",
+            borderRadius: "4px",
+            margin: "0 10px",
+            textDecoration: "none"
+        }
+        }, "Leave a Review")
     )
     );
 }
