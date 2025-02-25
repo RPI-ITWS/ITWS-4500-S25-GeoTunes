@@ -15,12 +15,17 @@ function CityExploration() {
             "div",
             { className: "review-box" },
             React.createElement("p", null, "WRITE A REVIEW...")
+        ),
+        React.createElement(
+            "a",
+            { href: "../cityExploration/cityExploration.html", className: "btn back-btn" },
+            "BACK"
         )
     );
 }
 
-const rootNode = document.getElementById("root"); // Ensure ID is 'root'
-const root = ReactDOM.createRoot(rootNode); // ✅ Works only in React 18+
+const rootNode = document.getElementById("root");
+const root = ReactDOM.createRoot(rootNode);
 
 root.render(
     React.createElement(
