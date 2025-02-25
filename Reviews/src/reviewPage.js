@@ -7,10 +7,9 @@ function CityExploration() {
         React.createElement(
             "div",
             { className: "search-container" },
-            React.createElement("span", { className: "search-icon" }, "🔍"),
+            React.createElement("span", { className: "search-icon" }, ""),
             React.createElement("h2", null, "Troy, NY")
         ),
-        React.createElement("button", { className: "btn" }, "WRITE A REVIEW"),
         React.createElement(
             "div",
             { className: "review-box" },
