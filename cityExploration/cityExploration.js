@@ -100,9 +100,16 @@ function CityExplorationApp() {
         fetch("/node/spotify?city=" + encodeURIComponent(cityName))
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: Replace with  actual Spotify playlist from the database.
-            setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><p>" +
-            (data.playlist || "No playlist available.") + "</p>");
+          // TODO: Replace with  actual Spotify playlist from the database.
+          setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><div id='embed-iframe'></div>");
+          window.onSpotifyIframeApiReady = (IFrameAPI) => {
+            const element = document.getElementById('embed-iframe');
+            const options = {
+              uri: `${data.external_urls.spotify}`
+            };
+            const callback = (EmbedController) => { };
+            IFrameAPI.createController(element, options, callback);
+          };
         })
         .catch(function (err) {
             console.error(err);
