@@ -110,38 +110,40 @@ function run() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: 'var(--primary-bg)',
+        backgroundColor: '#5D4037',
         borderBottom: '1px solid var(--border-color)',
-        padding: '10px 20px'
+        padding: '10px 20px',
+        width:'100%',
+        position:'fixed'
     };
 
     const titleStyle = {
         margin: '0 auto',
-        fontSize: '2.2em'
+        fontSize: '2.2em',
     };
 
     const titleLinkStyle = {
         textDecoration: 'none',
-        color: 'var(--primary-text)'
+        color: 'var(--primary-bg)'
     };
 
-    const navListStyle = {
-        listStyle: 'none',
-        margin: 0,
-        padding: 0,
-        display: 'flex'
-    };
+    // const navListStyle = {
+    //     listStyle: 'none',
+    //     margin: 0,
+    //     padding: 0,
+    //     display: 'flex'
+    // };
 
-    const navItemStyle = {
-        margin: '0 10px'
-    };
+    // const navItemStyle = {
+    //     margin: '0 10px'
+    // };
 
-    const navLinkStyle = {
-        textDecoration: 'none',
-        color: 'var(--primary-text)',
-        fontWeight: 'bold',
-        transition: 'var(--transition-default)'
-    };
+    // const navLinkStyle = {
+    //     textDecoration: 'none',
+    //     color: 'var(--primary-text)',
+    //     fontWeight: 'bold',
+    //     transition: 'var(--transition-default)'
+    // };
 
     const loginButtonStyle = {
         padding: '8px 16px',
@@ -193,7 +195,7 @@ function run() {
     };
 
     const footerStyle = {
-        backgroundColor: 'var(--primary-bg)',
+        backgroundColor: '#755146',
         borderTop: '1px solid var(--border-color)',
         textAlign: 'center',
         padding: '10px 20px',
@@ -214,7 +216,7 @@ function run() {
 
     const footerNavLinkStyle = {
         textDecoration: 'none',
-        color: 'var(--primary-text)',
+        color: '#ffff',
         transition: 'var(--transition-default)'
     };
 

@@ -24,6 +24,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     margin-bottom: 1rem;
+    color:#755146
 }
 
 .input-field label {
