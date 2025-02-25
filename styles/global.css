@@ -18,6 +18,8 @@ body {
     background-color: var(--primary-bg);
     color: var(--primary-text);
     font-family: 'Oleo Script';
+    min-height: 100vh;
+    color: #ffffff;
 }
 
 html, body {
@@ -26,12 +28,9 @@ html, body {
     padding: 0;
 }
 
-.page-container {
+#root {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-}
-
-.main-content {
-    flex: 1;
+    margin-top: 70px;
 }
