@@ -5,8 +5,6 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 
-// Import the "Add a Song" routes
-const addSongRoutes = require('./routes/addSongRoutes');
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -36,13 +34,36 @@ async function run() {
 }
 run().catch(console.dir);
 
+// Middleware
 app.use(express.static('public'));
+app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Use the "Add a Song" routes
-app.use('/', addSongRoutes);
+// Temporary in-memory storage (replace with MongoDB later)
+let songs = [];
 
-// Existing locale routes
+// Serve "Add a Song" HTML page
+app.get('/add-song', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
+});
+
+// Handle song submission
+app.post('/add-song', (req, res) => {
+    const { title, artist } = req.body;
+    if (title && artist) {
+        songs.push({ title, artist });
+        res.status(201).send({ message: "Song added successfully!" });
+    } else {
+        res.status(400).send({ error: "Invalid song data" });
+    }
+});
+
+// Get playlist (for frontend)
+app.get('/get-songs', (req, res) => {
+    res.json(songs);
+});
+
+// Existing Locale Routes (unchanged)
 app.get('/locale/:locale', (req, res) => {});
 
 app.post('/locale/:locale', (req, res) => {});
@@ -51,6 +72,7 @@ app.put('/locale/:locale', (req, res) => {});
 
 app.delete('/locale/:locale', (req, res) => {});
 
+// Start the server
 app.listen(port, () => {
-  console.log(`Listening on http://localhost:${port}`);
+    console.log(`Listening on http://localhost:${port}`);
 });
