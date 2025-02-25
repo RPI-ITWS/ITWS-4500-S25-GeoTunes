@@ -2,11 +2,14 @@ const express = require('express')
 const app = express()
 const port = 3000
 const cors = require("cors")
+const path = require('path');
+const bodyParser = require('body-parser');
 
 app.use(cors())
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -88,24 +91,25 @@ async function run() {
   console.log("running");
   try {
     console.log("connecting");
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
     console.error("Error:", error);
   } finally {
-    // Ensures that the client will close when you finish/error
+
   }
 }
 
 run().catch(console.dir);
 
-app.use(express.static('public'))
+// Middleware
+app.use(express.static('public'));
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/locale/:locale', (req, res) => {
-})
+// Temporary in-memory storage (replace with MongoDB later)
+let songs = [];
 
 app.get('/playlist/', async (req, res) => {
   let city = req.query.city;
@@ -122,11 +126,27 @@ app.post('/locale/:locale', async (req, res) => {
   console.log(data);
 })
 
-app.put('/locale/:locale', (req, res) => {
-})
+// Serve "Add a Song" HTML page
+app.get('/add-song', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
+});
 
-app.delete('/locale/:locale', (req, res) => {
-})
+
+// Handle song submission
+app.post('/add-song', (req, res) => {
+    const { title, artist } = req.body;
+    if (title && artist) {
+        songs.push({ title, artist });
+        res.status(201).send({ message: "Song added successfully!" });
+    } else {
+        res.status(400).send({ error: "Invalid song data" });
+    }
+});
+
+// Get playlist (for frontend)
+app.get('/get-songs', (req, res) => {
+    res.json(songs);
+});
 
 app.get('/newkey', async (req, res) => {
   await newKey();
@@ -136,3 +156,16 @@ app.listen(port, () => {
   console.log('Listening on *:3000')
 })
 
+// Existing Locale Routes (unchanged)
+app.get('/locale/:locale', (req, res) => {});
+
+app.post('/locale/:locale', (req, res) => {});
+
+app.put('/locale/:locale', (req, res) => {});
+
+app.delete('/locale/:locale', (req, res) => {});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Listening on http://localhost:${port}`);
+});
