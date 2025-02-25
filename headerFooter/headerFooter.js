@@ -80,7 +80,7 @@ function run() {
 
         function createLoginButton() {
             return React.createElement('a', {
-                href: 'login.html',
+                href: '/user-auth/login.html',
                 className: 'login-button',
                 style: loginButtonStyle
             }, 'Log In');
@@ -154,7 +154,8 @@ function run() {
         cursor: 'pointer',
         fontWeight: 'bold',
         textDecoration: 'none',
-        transition: 'var(--transition-default)'
+        transition: 'var(--transition-default)',
+        marginRight: '40px'
     };
 
     const dropdownButtonStyle = {
@@ -200,7 +201,9 @@ function run() {
         textAlign: 'center',
         padding: '10px 20px',
         fontSize: '0.9em',
+        color: 'var(--primary-bg)'
     };
+    
 
     const footerNavListStyle = {
         listStyle: 'none',
@@ -217,7 +220,7 @@ function run() {
     const footerNavLinkStyle = {
         textDecoration: 'none',
         color: '#ffff',
-        transition: 'var(--transition-default)'
+        color: 'var(--primary-bg)'
     };
 
     const mountComponents = () => {
