@@ -239,7 +239,7 @@ function CityExplorationApp() {
         "div",
         { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
         React.createElement("a", {
-        href: "addSong.html",
+        href: "/public/add-song.html",
         style: {
             display: "inline-block",
             padding: "0.75rem 1.5rem",
