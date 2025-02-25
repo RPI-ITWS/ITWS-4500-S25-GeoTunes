@@ -24,12 +24,12 @@ function MainContent() {
       { className: 'button-container' },
       React.createElement(
         'a',
-        { className: 'btn', href: '/user-auth/signup.html' },
+        { className: 'btn', href: '/user-auth/signup.html', style: { textDecoration:'none', color:'var(--primary-text)' } },
         'Sign Up'
       ),
       React.createElement(
         'a',
-        { className: 'btn', href: '/user-auth/login.html' },
+        { className: 'btn', href: '/user-auth/login.html', style: { textDecoration:'none', color:'var(--primary-text)' } },
         'Login'
       )
     )
