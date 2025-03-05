@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
 
     try {
-      await api.post('http://localhost:3000/users', formData);
+      await api.post('http://localhost:3000/users/signup', formData);
       // On successful signup, redirect or handle accordingly.
       handleSuccessfulAuth();
     } catch (err) {

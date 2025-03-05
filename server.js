@@ -129,17 +129,40 @@ app.post('/locale/:locale', async (req, res) => {
   console.log(data);
 })
 
-app.post('/users', (req, res) => {
-  console.log("User Post Request");
+app.post('/users/signup', (req, res) => {
+  console.log("Signup Post Request");
   const collection = db.collection("users");
   const body = req.body;
   console.log(body);
   const name = body.name;
   const spotifyId = body.spotify_id;
   const password = body.password;
-  collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password });
+  const email = body.email;
+  collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password, "email": email });
   console.log("added user");
   res.json({ "success": true })
+})
+
+app.post('/users/login', async (req, res) => {
+  console.log("Login Post Request");
+  const collection = db.collection("users");
+  const body = req.body;
+  console.log(body);
+  const email = body.email;
+  const password = body.password;
+  const account = await collection.findOne({ "email": email }, { projection: { email: 1, password: 1, _id: 0 } });
+  if (account === null) {
+    console.log("No Account");
+    res.json({ "success": false });
+  } else {
+    console.log("email: " + account.email + " password: " + account.password);
+    if (account.password === password) {
+      res.json({ "success": true })
+    }
+    else {
+      res.json({ "success": false });
+    }
+  }
 })
 
 // Serve "Add a Song" HTML page
