@@ -1,6 +1,5 @@
 function run() {
     addGoogleFont();
-
     addStickyFooterStyles();
 
     if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
@@ -10,19 +9,52 @@ function run() {
 
     const { useState, useEffect } = React;
 
+    // Import auth helper functions
+    let isAuthenticated, getCurrentUser, logout;
+    
+    // Dynamically import the auth helpers
+    const importAuthHelpers = async () => {
+        try {
+            const module = await import('/user-auth/scripts/authHelpers.js');
+            isAuthenticated = module.isAuthenticated;
+            getCurrentUser = module.getCurrentUser;
+            logout = module.logout;
+            return true;
+        } catch (error) {
+            console.error('Failed to import auth helpers:', error);
+            return false;
+        }
+    };
+
     const GeoTunesHeader = () => {
         const [isLoggedIn, setIsLoggedIn] = useState(false);
         const [showDropdown, setShowDropdown] = useState(false);
+        const [currentUser, setCurrentUser] = useState(null);
+        const [helpersLoaded, setHelpersLoaded] = useState(false);
 
         useEffect(() => {
-            const authToken = localStorage.getItem('authToken');
-            if (authToken) setIsLoggedIn(true);
+            // Load auth helpers and check authentication status
+            importAuthHelpers().then(success => {
+                if (success) {
+                    setHelpersLoaded(true);
+                    const authenticated = isAuthenticated();
+                    setIsLoggedIn(authenticated);
+                    
+                    if (authenticated) {
+                        setCurrentUser(getCurrentUser());
+                    }
+                }
+            });
         }, []);
 
         const handleLogout = () => {
-            localStorage.removeItem('authToken');
-            setIsLoggedIn(false);
-            window.location.reload();
+            if (helpersLoaded) {
+                logout();
+                setIsLoggedIn(false);
+                setCurrentUser(null);
+                // logout function might already handle redirection, but we'll keep this as a fallback
+                window.location.reload();
+            }
         };
 
         const toggleDropdown = () => setShowDropdown(!showDropdown);
@@ -56,7 +88,7 @@ function run() {
                 React.createElement('button', {
                     onClick: toggleDropdown,
                     style: dropdownButtonStyle
-                }, 'Account \u25BC'),
+                }, `${currentUser ? currentUser.name : 'Account'} \u25BC`),
                 showDropdown && React.createElement('ul', {
                     className: 'dropdown-menu',
                     style: dropdownMenuStyle
@@ -79,12 +111,15 @@ function run() {
         }
 
         function createLoginButton() {
-            return React.createElement('a', {
-                href: '/user-auth/login.html',
-                className: 'login-button',
-                style: loginButtonStyle
-            }, 'Log In');
-        }
+            return React.createElement('div', { style: { display: 'flex', gap: '10px' } },
+                // Use a button that calls window.location.href to navigate to the login route
+                React.createElement('button', {
+                    className: 'login-button',
+                    style: loginButtonStyle,
+                    onClick: () => { window.location.href = '/login'; }
+                }, 'Log In')
+            );
+        }        
     };
 
     const GeoTunesFooter = () => {
@@ -127,24 +162,6 @@ function run() {
         color: 'var(--primary-bg)'
     };
 
-    // const navListStyle = {
-    //     listStyle: 'none',
-    //     margin: 0,
-    //     padding: 0,
-    //     display: 'flex'
-    // };
-
-    // const navItemStyle = {
-    //     margin: '0 10px'
-    // };
-
-    // const navLinkStyle = {
-    //     textDecoration: 'none',
-    //     color: 'var(--primary-text)',
-    //     fontWeight: 'bold',
-    //     transition: 'var(--transition-default)'
-    // };
-
     const loginButtonStyle = {
         padding: '8px 16px',
         backgroundColor: 'var(--coral-pink)',
@@ -155,7 +172,7 @@ function run() {
         fontWeight: 'bold',
         textDecoration: 'none',
         transition: 'var(--transition-default)',
-        marginRight: '40px'
+        marginRight: '20px'
     };
 
     const dropdownButtonStyle = {
@@ -204,7 +221,6 @@ function run() {
         color: 'var(--primary-bg)'
     };
     
-
     const footerNavListStyle = {
         listStyle: 'none',
         margin: '5px 0 0 0',
@@ -264,5 +280,13 @@ function addStickyFooterStyles() {
     `;
     document.head.appendChild(style);
 }
+
+// Add script type="module" to ensure ES modules work
+const moduleScript = document.createElement('script');
+moduleScript.type = 'module';
+moduleScript.textContent = `
+import { isAuthenticated } from '/user-auth/scripts/authHelpers.js';
+`;
+document.head.appendChild(moduleScript);
 
 run();

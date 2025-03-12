@@ -5,17 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeoTunes</title>
     
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/homepage/styles.css">
     <link rel="stylesheet" href="/styles/global.css">
+    
+    <!-- Add Content Security Policy meta tag -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
     <div id="header-root"></div>
     <div id="root"></div>
     <div id="footer-root"></div>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Changed to cdnjs links -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 
-    <script src="scripts.js"></script>
-    <script type="module" src="/headerFooter/headerFooter.js"></script>
+    <!-- Make sure scripts are loaded in correct order -->
+    <script src="/homepage/scripts.js" defer></script>
+    <script type="module" src="/scripts/headerFooter.js" defer></script>
+    <script type="module" src="/scripts/addAuth.js" defer></script>
 </body>
 </html>

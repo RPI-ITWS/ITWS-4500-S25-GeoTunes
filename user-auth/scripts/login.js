@@ -1,4 +1,4 @@
-// public/scripts/login.js
+// user-auth/scripts/login.js
 import api from './api.js';
 import { validateLogin } from './validation.js';
 import { handleSuccessfulAuth } from './authHelpers.js';
@@ -39,10 +39,14 @@ form.addEventListener('submit', async (e) => {
     '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
 
     try {
-    await api.post('/api/auth/login', formData);
-    // On successful login, redirect or handle accordingly.
-    handleSuccessfulAuth();
+    // Send the login request and get the response
+    const userData = await api.post('/api/auth/login', formData);
+    console.log('Login successful:', userData);
+    
+    // Pass the response data to handleSuccessfulAuth
+    handleSuccessfulAuth(userData);
     } catch (err) {
+    console.error('Login error:', err);
     const responseErrors = err.response?.data?.errors || { general: 'Login failed' };
     if (responseErrors.general) {
         errorBanner.textContent = responseErrors.general;
