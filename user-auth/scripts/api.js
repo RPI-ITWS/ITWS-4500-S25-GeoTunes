@@ -1,5 +1,4 @@
-// user-auth/scripts/api.js
-const API_BASE_URL = ''; // empty string means same domain
+const API_BASE_URL = ''; 
 
 class Api {
 constructor() {

@@ -69,7 +69,7 @@ function run() {
                 )
             ),
             React.createElement('h1', { style: titleStyle },
-                React.createElement('a', { href: '/cityExploration/cityExploration.html', style: titleLinkStyle }, 'GeoTunes')
+                React.createElement('a', { href: '/city-exploration', style: titleLinkStyle }, 'GeoTunes')
             ),
             React.createElement('div', { className: 'auth-controls' },
                 isLoggedIn ? createDropdown() : createLoginButton()
@@ -111,7 +111,7 @@ function run() {
                 React.createElement('button', {
                     className: 'login-button',
                     style: loginButtonStyle,
-                    onClick: () => { window.location.href = '/user-auth/login.html'; }
+                    onClick: () => { window.location.href = '/login'; }
                 }, 'Log In')
             );
         }

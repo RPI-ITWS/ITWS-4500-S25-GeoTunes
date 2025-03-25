@@ -1,27 +1,19 @@
-// This file handles adding authentication functionality to pages
-// Place this in your project root
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if user is logged in
     const token = localStorage.getItem('authToken');
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
     
-    // Get the navigation element to add auth buttons
     const navElement = document.querySelector('nav') || document.querySelector('header');
     
     if (navElement) {
-    // Create auth container
     const authContainer = document.createElement('div');
     authContainer.className = 'auth-container';
     
     if (token && user) {
-        // User is logged in
         authContainer.innerHTML = `
         <span class="welcome-text">Welcome, ${user.name}</span>
         <button id="logout-btn" class="auth-btn">Logout</button>
         `;
         
-        // Add event listener for logout
         setTimeout(() => {
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
@@ -34,18 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 0);
         
     } else {
-        // User is not logged in
         authContainer.innerHTML = `
         <a href="/login" class="auth-btn login-btn">Login</a>
         <a href="/signup" class="auth-btn signup-btn">Sign Up</a>
         `;
     }
     
-    // Append to nav
     navElement.appendChild(authContainer);
     }
     
-    // Add styles
     const style = document.createElement('style');
     style.textContent = `
     .auth-container {

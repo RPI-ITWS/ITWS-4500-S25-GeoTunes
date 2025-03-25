@@ -1,4 +1,3 @@
-// user-auth/scripts/login.js
 import api from './api.js';
 import { validateLogin } from './validation.js';
 import { handleSuccessfulAuth } from './authHelpers.js';
@@ -11,7 +10,6 @@ const loginButton = document.getElementById('login-button');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Clear previous errors
     errorBanner.style.display = 'none';
     document.getElementById('error-email').textContent = '';
     document.getElementById('error-password').textContent = '';
@@ -21,7 +19,6 @@ form.addEventListener('submit', async (e) => {
     password: form.password.value.trim()
     };
 
-    // Client-side validation
     const errors = validateLogin(formData);
     if (Object.keys(errors).length > 0) {
     if (errors.email) {
@@ -33,17 +30,14 @@ form.addEventListener('submit', async (e) => {
     return;
     }
 
-    // Set loading state
     loginButton.disabled = true;
     loginButton.innerHTML =
     '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
 
     try {
-    // Send the login request and get the response
     const userData = await api.post('/api/auth/login', formData);
     console.log('Login successful:', userData);
     
-    // Pass the response data to handleSuccessfulAuth
     handleSuccessfulAuth(userData);
     } catch (err) {
     console.error('Login error:', err);

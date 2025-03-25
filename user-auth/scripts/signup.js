@@ -1,4 +1,3 @@
-// user-auth/scripts/signup.js
 import api from './api.js';
 import { validateSignup } from './validation.js';
 import { handleSuccessfulAuth } from './authHelpers.js';
@@ -11,7 +10,6 @@ const signupButton = document.getElementById('signup-button');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Clear previous errors
     errorBanner.style.display = 'none';
     document.getElementById('error-name').textContent = '';
     document.getElementById('error-email').textContent = '';
@@ -25,7 +23,6 @@ form.addEventListener('submit', async (e) => {
     confirmPassword: form.confirmPassword.value.trim()
     };
 
-    // Client-side validation
     const errors = validateSignup(formData);
     if (Object.keys(errors).length > 0) {
     if (errors.name) {
@@ -43,17 +40,14 @@ form.addEventListener('submit', async (e) => {
     return;
     }
 
-    // Set loading state
     signupButton.disabled = true;
     signupButton.innerHTML =
     '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
 
     try {
-    // Send the signup request and get the response
     const userData = await api.post('/api/auth/signup', formData);
     console.log('Signup successful:', userData);
     
-    // Pass the response data to handleSuccessfulAuth
     handleSuccessfulAuth(userData);
     } catch (err) {
     console.error('Signup error:', err);
