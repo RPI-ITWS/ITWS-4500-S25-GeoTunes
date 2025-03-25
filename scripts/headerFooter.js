@@ -9,10 +9,8 @@ function run() {
 
     const { useState, useEffect } = React;
 
-    // Import auth helper functions
     let isAuthenticated, getCurrentUser, logout;
-    
-    // Dynamically import the auth helpers
+
     const importAuthHelpers = async () => {
         try {
             const module = await import('/user-auth/scripts/authHelpers.js');
@@ -33,13 +31,12 @@ function run() {
         const [helpersLoaded, setHelpersLoaded] = useState(false);
 
         useEffect(() => {
-            // Load auth helpers and check authentication status
             importAuthHelpers().then(success => {
                 if (success) {
                     setHelpersLoaded(true);
                     const authenticated = isAuthenticated();
                     setIsLoggedIn(authenticated);
-                    
+
                     if (authenticated) {
                         setCurrentUser(getCurrentUser());
                     }
@@ -52,7 +49,6 @@ function run() {
                 logout();
                 setIsLoggedIn(false);
                 setCurrentUser(null);
-                // logout function might already handle redirection, but we'll keep this as a fallback
                 window.location.reload();
             }
         };
@@ -66,7 +62,7 @@ function run() {
             React.createElement('div', { className: 'logo' },
                 React.createElement('a', { href: '/' },
                     React.createElement('img', {
-                        src: "", //add file pathing for logo
+                        src: '/assets/logo.png',
                         alt: "GeoTunes Logo",
                         style: { height: '50px' }
                     })
@@ -112,14 +108,13 @@ function run() {
 
         function createLoginButton() {
             return React.createElement('div', { style: { display: 'flex', gap: '10px' } },
-                // Use a button that calls window.location.href to navigate to the login route
                 React.createElement('button', {
                     className: 'login-button',
                     style: loginButtonStyle,
-                    onClick: () => { window.location.href = '/login'; }
+                    onClick: () => { window.location.href = '/user-auth/login.html'; }
                 }, 'Log In')
             );
-        }        
+        }
     };
 
     const GeoTunesFooter = () => {
@@ -148,8 +143,11 @@ function run() {
         backgroundColor: '#5D4037',
         borderBottom: '1px solid var(--border-color)',
         padding: '10px 20px',
-        width:'100%',
-        position:'fixed'
+        width: '100%',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 1000
     };
 
     const titleStyle = {
@@ -218,9 +216,11 @@ function run() {
         textAlign: 'center',
         padding: '10px 20px',
         fontSize: '0.9em',
-        color: 'var(--primary-bg)'
+        color: 'var(--primary-bg)',
+        width: '100%',
+        position: 'relative'
     };
-    
+
     const footerNavListStyle = {
         listStyle: 'none',
         margin: '5px 0 0 0',
@@ -235,18 +235,22 @@ function run() {
 
     const footerNavLinkStyle = {
         textDecoration: 'none',
-        color: '#ffff',
         color: 'var(--primary-bg)'
     };
 
     const mountComponents = () => {
         const headerMount = document.getElementById('header-root');
-        if (headerMount)
-            ReactDOM.render(React.createElement(GeoTunesHeader), headerMount);
-
         const footerMount = document.getElementById('footer-root');
-        if (footerMount)
+
+        if (headerMount) {
+            headerMount.innerHTML = '';
+            ReactDOM.render(React.createElement(GeoTunesHeader), headerMount);
+        }
+
+        if (footerMount) {
+            footerMount.innerHTML = '';
             ReactDOM.render(React.createElement(GeoTunesFooter), footerMount);
+        }
     };
 
     if (document.readyState === 'loading') {
@@ -257,36 +261,38 @@ function run() {
 }
 
 function addGoogleFont() {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
+    if (!document.querySelector('link[href*="googleapis.com/css?family=Oleo+Script"]')) {
+        const link = document.createElement('link');
+        link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+    }
 }
 
 function addStickyFooterStyles() {
-    const style = document.createElement('style');
-    style.innerHTML = `
-    html, body {
-        height: 100%;
-        margin: 0;
+    if (!document.getElementById('sticky-footer-styles')) {
+        const style = document.createElement('style');
+        style.id = 'sticky-footer-styles';
+        style.innerHTML = `
+            html, body {
+                height: 100%;
+                margin: 0;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                padding-top: 70px;
+            }
+            #root {
+                flex: 1;
+                margin-bottom: 20px;
+            }
+        `;
+        document.head.appendChild(style);
     }
-    body {
-        display: flex;
-        flex-direction: column;
-    }
-    #content {
-        flex: 1;
-    }
-    `;
-    document.head.appendChild(style);
 }
 
-// Add script type="module" to ensure ES modules work
-const moduleScript = document.createElement('script');
-moduleScript.type = 'module';
-moduleScript.textContent = `
-import { isAuthenticated } from '/user-auth/scripts/authHelpers.js';
-`;
-document.head.appendChild(moduleScript);
-
-run();
+if (!window.headerFooterInitialized) {
+    window.headerFooterInitialized = true;
+    run();
+}

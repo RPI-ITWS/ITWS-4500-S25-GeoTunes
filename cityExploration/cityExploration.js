@@ -11,6 +11,7 @@ function CityExplorationApp() {
     React.useEffect(function () {
     if (!mapInitialized) {
         var defaultCoords = [42.729996, -73.681763]; 
+        L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
         var map = L.map("map").setView(defaultCoords, 13);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",

@@ -6,26 +6,18 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Initialize Express app
 const app = express();
 const port = process.env.PORT || 3000;
 
-// JWT Secret - in production, use an environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the public folder
 app.use(express.static('public'));
 
-// Serve any files in the styles folder at the /styles path
 app.use('/styles', express.static(path.join(__dirname, 'styles')));
 
-// *** Updated static middleware ***
-// Since your headerFooter.js is located at /project-root/scripts/headerFooter.js,
-// we serve the entire "scripts" folder at the URL path "/scripts".
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
 
 app.use('/homepage', express.static(path.join(__dirname, 'homepage')));
@@ -33,22 +25,18 @@ app.use('/homepage', express.static(path.join(__dirname, 'homepage')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve addAuth.js from project root
 app.get('/addAuth.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'addAuth.js'));
 });
 
-// Set proper headers for React development
-app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+//   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+//   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+//   next();
+// });
 
-
-// MongoDB Connection
-const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGODB;
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -57,7 +45,6 @@ const client = new MongoClient(uri, {
   }
 });
 
-// Connect to MongoDB
 async function connectToDatabase() {
   try {
     await client.connect();
@@ -71,7 +58,6 @@ async function connectToDatabase() {
 }
 connectToDatabase().catch(console.dir);
 
-// Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -89,7 +75,6 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-// Spotify API Functions
 async function getKey() {
   const db = client.db("geotunes");
   const collection = db.collection('api_data');
@@ -138,7 +123,6 @@ async function playlistRequest(id) {
   return data;
 }
 
-// Routes for HTML pages
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'homepage', 'index.html'));
 });
@@ -149,8 +133,7 @@ app.get('/city-exploration', (req, res) => {
   res.sendFile(path.join(__dirname, 'cityExploration', 'cityExploration.html'));
 });
 
-// Serve static files from the cityExploration directory
-app.use('/cityExploration', express.static(path.join(__dirname, 'cityExploration')));
+app.use('/cityExploration', express.static(path.join(__dirname, 'cityExploration'))); 
 
 app.get('/reviews', (req, res) => {
   res.sendFile(path.join(__dirname, 'Reviews', 'reviewPage.html'));
@@ -164,10 +147,8 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'user-auth', 'signup.html'));
 });
 
-// Serve script files from the user-auth folder
 app.use('/user-auth/scripts', express.static(path.join(__dirname, 'user-auth', 'scripts')));
 
-// Authentication Routes
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -250,7 +231,6 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Protected route example - requires authentication
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
   try {
     const db = client.db("geotunes");
@@ -269,7 +249,6 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Import routes (if available)
 try {
   const addSongRoutes = require('./routes/addSongRoutes');
   app.use('/api/songs', addSongRoutes);
@@ -277,11 +256,10 @@ try {
   console.warn('Warning: addSongRoutes.js not found. Skipping route import.');
 }
 
-// Playlist routes
 app.get('/playlist/', async (req, res) => {
   try {
     let city = req.query.city;
-    let id = "6UR7T05u7cIsNAuqUE6UV0"; // Default playlist ID
+    let id = "6UR7T05u7cIsNAuqUE6UV0"; 
     if (city) {
       const db = client.db("geotunes");
       const cityCollection = db.collection("city_playlists");
@@ -298,7 +276,6 @@ app.get('/playlist/', async (req, res) => {
   }
 });
 
-// Song routes - protected with authentication
 app.get('/add-song', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
 });
@@ -336,7 +313,6 @@ app.get('/get-songs', async (req, res) => {
   }
 });
 
-// Spotify API key refresh route
 app.get('/newkey', async (req, res) => {
   try {
     const key = await newKey();
@@ -347,7 +323,6 @@ app.get('/newkey', async (req, res) => {
   }
 });
 
-// Locale routes
 app.get('/locale/:locale', async (req, res) => {
   try {
     const { locale } = req.params;
@@ -416,18 +391,15 @@ app.delete('/locale/:locale', authenticateToken, async (req, res) => {
   }
 });
 
-// 404 error handling
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).json({ error: "Internal server error" });
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
