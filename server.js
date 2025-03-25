@@ -29,13 +29,6 @@ app.get('/addAuth.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'addAuth.js'));
 });
 
-// app.use((req, res, next) => {
-//   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-//   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-//   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-//   next();
-// });
-
 const uri = process.env.MONGODB;
 const client = new MongoClient(uri, {
   serverApi: {
