@@ -104,7 +104,7 @@ async function run() {
 run().catch(console.dir);
 
 // Middleware
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'addSong')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -140,24 +140,45 @@ app.post('/users', (req, res) => {
 
 // Serve "Add a Song" HTML page
 app.get('/add-song', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
+  res.sendFile(path.join(__dirname, 'addSong', 'add-song.html'));
 });
 
 
 // Handle song submission
-app.post('/add-song', (req, res) => {
-  const { title, artist } = req.body;
-  if (title && artist) {
-    songs.push({ title, artist });
-    res.status(201).send({ message: "Song added successfully!" });
-  } else {
-    res.status(400).send({ error: "Invalid song data" });
+app.post('/api/songs', async (req, res) => {
+  try {
+      const { title, artist } = req.body;
+      const db = client.db("geotunes");
+      const result = await db.collection('songs').insertOne({
+          title,
+          artist,
+          created_at: new Date()
+      });
+      
+      res.status(201).json({
+          _id: result.insertedId,
+          title,
+          artist,
+          created_at: new Date()
+      });
+  } catch (error) {
+      res.status(500).json({ error: "Server error" });
   }
 });
 
 // Get playlist (for frontend)
-app.get('/get-songs', (req, res) => {
-  res.json(songs);
+app.get('/api/songs', async (req, res) => {
+  try {
+      const db = client.db("geotunes");
+      const songs = await db.collection('songs')
+          .find()
+          .sort({ created_at: -1 })
+          .toArray();
+          
+      res.json(songs);
+  } catch (error) {
+      res.status(500).json({ error: "Server error" });
+  }
 });
 
 app.get('/newkey', async (req, res) => {
