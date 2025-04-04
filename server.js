@@ -270,7 +270,7 @@ app.get('/playlist/', async (req, res) => {
 });
 
 app.get('/add-song', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'add-song.html'));
+  res.sendFile(path.join(__dirname, 'addSong', 'add-song.html'));
 });
 
 app.post('/add-song', authenticateToken, async (req, res) => {
