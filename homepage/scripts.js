@@ -1,18 +1,5 @@
 'use strict';
 
-// function Navbar() {
-//   return React.createElement(
-//     'nav',
-//     { className: 'navbar' },
-//     React.createElement('div', { className: 'logo' }, 'LOGO'),
-//     React.createElement(
-//       'a',
-//       { className: 'login-link', href: '#login' },
-//       'LOGIN/SIGN UP'
-//     )
-//   );
-// }
-
 function MainContent() {
   return React.createElement(
     'div',
@@ -24,12 +11,12 @@ function MainContent() {
       { className: 'button-container' },
       React.createElement(
         'a',
-        { className: 'btn', href: '#signup' },
+        { className: 'btn', href: '/user-auth/signup.html', style: { textDecoration:'none', color:'var(--primary-text)' } },
         'Sign Up'
       ),
       React.createElement(
         'a',
-        { className: 'btn', href: '#login' },
+        { className: 'btn', href: '/user-auth/login.html', style: { textDecoration:'none', color:'var(--primary-text)' } },
         'Login'
       )
     )
@@ -46,3 +33,17 @@ root.render(
     React.createElement(MainContent)
   )
 );
+
+
+// function Navbar() {
+//   return React.createElement(
+//     'nav',
+//     { className: 'navbar' },
+//     React.createElement('div', { className: 'logo' }, 'LOGO'),
+//     React.createElement(
+//       'a',
+//       { className: 'login-link', href: '#login' },
+//       'LOGIN/SIGN UP'
+//     )
+//   );
+// }

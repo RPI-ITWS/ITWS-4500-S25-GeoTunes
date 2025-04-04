@@ -1,9 +1,15 @@
 const express = require('express')
 const app = express()
 const port = 3000
+const cors = require("cors")
+const path = require('path');
+const bodyParser = require('body-parser');
+
+app.use(cors())
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://leei8:2sja71D1GTEUprrA@cluster0.2path.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -12,40 +18,181 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+async function spotifyRequest() {
+  let key = await getKey();
+  let response = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+    headers: {
+      "Authorization": `Bearer  ${key}`,
+    }
+  });
+  let data = await response.json();
+  console.log(data);
+  if (data?.error?.message === "The access token expired") {
+    key = await newKey();
+    response = await fetch("https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb", {
+      headers: {
+        "Authorization": `Bearer  ${key}`,
+      }
+    });
+    data = await response.json();
+  }
+  return data;
+}
+
+async function playlistRequest(id) {
+  let key = await getKey();
+  let response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
+    headers: {
+      "Authorization": `Bearer  ${key}`,
+    }
+  });
+  let data = await response.json();
+  console.log(data);
+  if (data?.error?.message === "The access token expired") {
+    key = await newKey();
+    response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
+      headers: {
+        "Authorization": `Bearer  ${key}`,
+      }
+    });
+    data = await response.json();
+  }
+  return data;
+}
+
+// gets a new key from spotify, places it into the database, and then returns the value
+async function newKey() {
+  let key = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    body: "grant_type=client_credentials&client_id=b931d26ffacd40e1bb2a85ff3b82df0e&client_secret=1841d9b707d445d0b4ca9821981c0cc8",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+  key = await key.json();
+  const db = client.db("geotunes");
+  const collection = db.collection('api_data');
+  await collection.deleteMany({});
+  await collection.insertOne({ "key": key.access_token, "created_at": new Date() });
+  console.log("New key:", key);
+  return key.access_token;
+}
+
+async function getKey() {
+  const db = client.db("geotunes");
+  const collection = db.collection('api_data');
+  const key = await collection.findOne({}, { projection: { key: 1, _id: 0 } });
+  console.log("key", key);
+  return key["key"];
+}
+
 async function run() {
   console.log("running");
   try {
     console.log("connecting");
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
     console.error("Error:", error);
   } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-    console.log("ending");
+
   }
 }
+
 run().catch(console.dir);
 
-app.use(express.static('public'))
+// Middleware
+app.use(express.static(path.join(__dirname, 'addSong')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/locale/:locale', (req, res) => {
+// Temporary in-memory storage (replace with MongoDB later)
+let songs = [];
+
+app.get('/playlist/', async (req, res) => {
+  let city = req.query.city;
+  let id = "6UR7T05u7cIsNAuqUE6UV0";
+  data = await playlistRequest(id);
+  res.json(data);
 })
 
-app.post('/locale/:locale', (req, res) => {
+app.post('/locale/:locale', async (req, res) => {
+  const db = client.db("geotunes");
+  const collection = db.collection("api_data");
+  const key = await collection.find("key");
+  let data = await (spotifyRequest());
+  console.log(data);
 })
 
-app.put('/locale/:locale', (req, res) => {
+app.post('/users', (req, res) => {
+  const db = client.db("geotunes");
+  const collection = db.collection("users");
+  const body = req.body;
+  console.log(body);
+  const name = body.name;
+  const spotifyId = body.spotify_id;
+  const password = body.password;
+  collection.insertOne({ "name": name, "spotify_id": spotifyId, "password": password });
+  console.log("added user");
 })
 
-app.delete('/locale/:locale', (req, res) => {
+// Serve "Add a Song" HTML page
+app.get('/add-song', (req, res) => {
+  res.sendFile(path.join(__dirname, 'addSong', 'add-song.html'));
+});
+
+
+// Handle song submission
+app.post('/api/songs', async (req, res) => {
+  try {
+      const { title, artist } = req.body;
+      const db = client.db("geotunes");
+      const result = await db.collection('songs').insertOne({
+          title,
+          artist,
+          created_at: new Date()
+      });
+      
+      res.status(201).json({
+          _id: result.insertedId,
+          title,
+          artist,
+          created_at: new Date()
+      });
+  } catch (error) {
+      res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get playlist (for frontend)
+app.get('/api/songs', async (req, res) => {
+  try {
+      const db = client.db("geotunes");
+      const songs = await db.collection('songs')
+          .find()
+          .sort({ created_at: -1 })
+          .toArray();
+          
+      res.json(songs);
+  } catch (error) {
+      res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get('/newkey', async (req, res) => {
+  await newKey();
 })
 
+// Existing Locale Routes (unchanged)
+app.get('/locale/:locale', (req, res) => { });
+
+app.put('/locale/:locale', (req, res) => { });
+
+app.delete('/locale/:locale', (req, res) => { });
+
+// Start the server
 app.listen(port, () => {
-  console.log('Listening on *:3000')
-})
-
+  console.log(`Listening on http://localhost:${port}`);
+});
