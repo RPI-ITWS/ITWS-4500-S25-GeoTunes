@@ -17,10 +17,10 @@ form.addEventListener('submit', async (e) => {
     document.getElementById('error-confirmPassword').textContent = '';
 
     const formData = {
-    name: form.name.value.trim(),
-    email: form.email.value.trim(),
-    password: form.password.value.trim(),
-    confirmPassword: form.confirmPassword.value.trim()
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        password: form.password.value.trim(),
+        confirmPassword: form.confirmPassword.value.trim()
     };
 
     const errors = validateSignup(formData);
