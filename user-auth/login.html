@@ -26,18 +26,20 @@
                 <input type="password" id="password" name="password" required />
                 <span class="error-message" id="error-password" aria-live="assertive"></span>
             </div>
-            <button type="submit" id="login-button"><a href="/cityExploration/cityExploration.html">LOG IN</a></button>
+
+            <button type="submit" id="login-button">LOG IN</button>
             </form>
-            <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+            <p>Don't have an account? <a href="/signup">Sign Up</a></p>
         </div>
         </div>
     </main>
     <div id="footer-root"></div>
-    <script type="module" src="scripts/api.js"></script>
-    <script type="module" src="scripts/validation.js"></script>
-    <script type="module" src="scripts/authHelpers.js"></script>
-    <script type="module" src="scripts/login.js"></script>
-    <script type="module" src="/headerFooter/headerFooter.js"></script>
+
+    <script type="module" src="/user-auth/scripts/api.js"></script>
+    <script type="module" src="/user-auth/scripts/validation.js"></script>
+    <script type="module" src="/user-auth/scripts/authHelpers.js"></script>
+    <script type="module" src="/user-auth/scripts/login.js"></script>
+    <script type="module" src="/scripts/headerFooter.js"></script>
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 </body>

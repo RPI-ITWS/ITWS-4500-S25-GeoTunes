@@ -1,4 +1,3 @@
-// public/scripts/validation.js
 export function validateLogin(data) {
     const errors = {};
 

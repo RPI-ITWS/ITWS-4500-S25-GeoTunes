@@ -1,6 +1,5 @@
 function run() {
     addGoogleFont();
-
     addStickyFooterStyles();
 
     if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
@@ -10,19 +9,48 @@ function run() {
 
     const { useState, useEffect } = React;
 
+    let isAuthenticated, getCurrentUser, logout;
+
+    const importAuthHelpers = async () => {
+        try {
+            const module = await import('/user-auth/scripts/authHelpers.js');
+            isAuthenticated = module.isAuthenticated;
+            getCurrentUser = module.getCurrentUser;
+            logout = module.logout;
+            return true;
+        } catch (error) {
+            console.error('Failed to import auth helpers:', error);
+            return false;
+        }
+    };
+
     const GeoTunesHeader = () => {
         const [isLoggedIn, setIsLoggedIn] = useState(false);
         const [showDropdown, setShowDropdown] = useState(false);
+        const [currentUser, setCurrentUser] = useState(null);
+        const [helpersLoaded, setHelpersLoaded] = useState(false);
 
         useEffect(() => {
-            const authToken = localStorage.getItem('authToken');
-            if (authToken) setIsLoggedIn(true);
+            importAuthHelpers().then(success => {
+                if (success) {
+                    setHelpersLoaded(true);
+                    const authenticated = isAuthenticated();
+                    setIsLoggedIn(authenticated);
+
+                    if (authenticated) {
+                        setCurrentUser(getCurrentUser());
+                    }
+                }
+            });
         }, []);
 
         const handleLogout = () => {
-            localStorage.removeItem('authToken');
-            setIsLoggedIn(false);
-            window.location.reload();
+            if (helpersLoaded) {
+                logout();
+                setIsLoggedIn(false);
+                setCurrentUser(null);
+                window.location.reload();
+            }
         };
 
         const toggleDropdown = () => setShowDropdown(!showDropdown);
@@ -34,14 +62,14 @@ function run() {
             React.createElement('div', { className: 'logo' },
                 React.createElement('a', { href: '/' },
                     React.createElement('img', {
-                        src: "", //add file pathing for logo
+                        src: '/assets/logo.png',
                         alt: "GeoTunes Logo",
                         style: { height: '50px' }
                     })
                 )
             ),
             React.createElement('h1', { style: titleStyle },
-                React.createElement('a', { href: '/cityExploration/cityExploration.html', style: titleLinkStyle }, 'GeoTunes')
+                React.createElement('a', { href: '/city-exploration', style: titleLinkStyle }, 'GeoTunes')
             ),
             React.createElement('div', { className: 'auth-controls' },
                 isLoggedIn ? createDropdown() : createLoginButton()
@@ -56,7 +84,7 @@ function run() {
                 React.createElement('button', {
                     onClick: toggleDropdown,
                     style: dropdownButtonStyle
-                }, 'Account \u25BC'),
+                }, `${currentUser ? currentUser.name : 'Account'} \u25BC`),
                 showDropdown && React.createElement('ul', {
                     className: 'dropdown-menu',
                     style: dropdownMenuStyle
@@ -79,11 +107,13 @@ function run() {
         }
 
         function createLoginButton() {
-            return React.createElement('a', {
-                href: '/user-auth/login.html',
-                className: 'login-button',
-                style: loginButtonStyle
-            }, 'Log In');
+            return React.createElement('div', { style: { display: 'flex', gap: '10px' } },
+                React.createElement('button', {
+                    className: 'login-button',
+                    style: loginButtonStyle,
+                    onClick: () => { window.location.href = '/login'; }
+                }, 'Log In')
+            );
         }
     };
 
@@ -113,8 +143,11 @@ function run() {
         backgroundColor: '#5D4037',
         borderBottom: '1px solid var(--border-color)',
         padding: '10px 20px',
-        width:'100%',
-        position:'fixed'
+        width: '100%',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 1000
     };
 
     const titleStyle = {
@@ -127,24 +160,6 @@ function run() {
         color: 'var(--primary-bg)'
     };
 
-    // const navListStyle = {
-    //     listStyle: 'none',
-    //     margin: 0,
-    //     padding: 0,
-    //     display: 'flex'
-    // };
-
-    // const navItemStyle = {
-    //     margin: '0 10px'
-    // };
-
-    // const navLinkStyle = {
-    //     textDecoration: 'none',
-    //     color: 'var(--primary-text)',
-    //     fontWeight: 'bold',
-    //     transition: 'var(--transition-default)'
-    // };
-
     const loginButtonStyle = {
         padding: '8px 16px',
         backgroundColor: 'var(--coral-pink)',
@@ -155,7 +170,7 @@ function run() {
         fontWeight: 'bold',
         textDecoration: 'none',
         transition: 'var(--transition-default)',
-        marginRight: '40px'
+        marginRight: '20px'
     };
 
     const dropdownButtonStyle = {
@@ -201,9 +216,10 @@ function run() {
         textAlign: 'center',
         padding: '10px 20px',
         fontSize: '0.9em',
-        color: 'var(--primary-bg)'
+        color: 'var(--primary-bg)',
+        width: '100%',
+        position: 'relative'
     };
-    
 
     const footerNavListStyle = {
         listStyle: 'none',
@@ -219,18 +235,22 @@ function run() {
 
     const footerNavLinkStyle = {
         textDecoration: 'none',
-        color: '#ffff',
         color: 'var(--primary-bg)'
     };
 
     const mountComponents = () => {
         const headerMount = document.getElementById('header-root');
-        if (headerMount)
-            ReactDOM.render(React.createElement(GeoTunesHeader), headerMount);
-
         const footerMount = document.getElementById('footer-root');
-        if (footerMount)
+
+        if (headerMount) {
+            headerMount.innerHTML = '';
+            ReactDOM.render(React.createElement(GeoTunesHeader), headerMount);
+        }
+
+        if (footerMount) {
+            footerMount.innerHTML = '';
             ReactDOM.render(React.createElement(GeoTunesFooter), footerMount);
+        }
     };
 
     if (document.readyState === 'loading') {
@@ -241,28 +261,38 @@ function run() {
 }
 
 function addGoogleFont() {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
+    if (!document.querySelector('link[href*="googleapis.com/css?family=Oleo+Script"]')) {
+        const link = document.createElement('link');
+        link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+    }
 }
 
 function addStickyFooterStyles() {
-    const style = document.createElement('style');
-    style.innerHTML = `
-    html, body {
-        height: 100%;
-        margin: 0;
+    if (!document.getElementById('sticky-footer-styles')) {
+        const style = document.createElement('style');
+        style.id = 'sticky-footer-styles';
+        style.innerHTML = `
+            html, body {
+                height: 100%;
+                margin: 0;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                padding-top: 70px;
+            }
+            #root {
+                flex: 1;
+                margin-bottom: 20px;
+            }
+        `;
+        document.head.appendChild(style);
     }
-    body {
-        display: flex;
-        flex-direction: column;
-    }
-    #content {
-        flex: 1;
-    }
-    `;
-    document.head.appendChild(style);
 }
 
-run();
+if (!window.headerFooterInitialized) {
+    window.headerFooterInitialized = true;
+    run();
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a Song - GeoTunes</title>
+
+    <link rel="stylesheet" href="/styles/global.css">  
+    <link rel="stylesheet" href="/styles/components.css">
+    <link rel="stylesheet" href="/styles/auth.css">
+    
+</head>
+<body>
+
+    <!-- Header -->
+    <div id="header-root"></div>
+
+    <!-- Main Content -->
+    <div class="page-container">
+        <div class="main-content">
+            <div class="container">
+                <h2>Add a Song to the Playlist</h2>
+
+                <form id="add-song-form">
+                    <input type="text" name="title" id="song-title" placeholder="Song Title" required><br>
+                    <input type="text" name="artist" id="artist-name" placeholder="Artist Name" required><br>
+                    <button type="submit">Add Song</button>
+                </form>
+
+                <h3>Current Playlist</h3>
+                <ul id="playlist"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer-root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="scripts.js"></script>
+    <script src="scripts/add-song.js"></script>
+
+</body>
+</html>
