@@ -11,6 +11,7 @@ function CityExplorationApp() {
     React.useEffect(function () {
     if (!mapInitialized) {
         var defaultCoords = [42.729996, -73.681763]; 
+        L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
         var map = L.map("map").setView(defaultCoords, 13);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
@@ -100,9 +101,15 @@ function CityExplorationApp() {
         fetch("/node/spotify?city=" + encodeURIComponent(cityName))
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: Replace with  actual Spotify playlist from the database.
-            setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><p>" +
-            (data.playlist || "No playlist available.") + "</p>");
+          setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><div id='embed-iframe'></div>");
+          window.onSpotifyIframeApiReady = (IFrameAPI) => {
+            const element = document.getElementById('embed-iframe');
+            const options = {
+              uri: `${data.external_urls.spotify}`
+            };
+            const callback = (EmbedController) => { };
+            IFrameAPI.createController(element, options, callback);
+          };
         })
         .catch(function (err) {
             console.error(err);
@@ -124,7 +131,6 @@ function CityExplorationApp() {
         fetch("/node/events?city=" + encodeURIComponent(cityName))
         .then(function (response) { return response.json(); })
         .then(function (data) {
-            // TODO: Replace with actual events from the database.
             setTabContent("<h4>Events in " + cityName + "</h4><p>" +
             (data.events || "No events available.") + "</p>");
         })
@@ -165,7 +171,6 @@ function CityExplorationApp() {
     return React.createElement(
     "div",
     { className: "container", style: { width: "90%", margin: "0 auto" } },
-    // Search Bar
     React.createElement(
         "div",
         { className: "search-bar", style: { textAlign: "center", margin: "20px 0" } },
@@ -239,7 +244,7 @@ function CityExplorationApp() {
         "div",
         { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
         React.createElement("a", {
-        href: "addSong.html",
+        href: "/add-song",
         style: {
             display: "inline-block",
             padding: "0.75rem 1.5rem",
@@ -251,7 +256,7 @@ function CityExplorationApp() {
         }
         }, "Add to Playlist"),
         React.createElement("a", {
-        href: "/Reviews/reviewPage.html",
+        href: "/reviews",
         style: {
             display: "inline-block",
             padding: "0.75rem 1.5rem",

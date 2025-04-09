@@ -11,12 +11,12 @@ function MainContent() {
       { className: 'button-container' },
       React.createElement(
         'a',
-        { className: 'btn', href: '/user-auth/signup.html', style: { textDecoration:'none', color:'var(--primary-text)' } },
+        { className: 'btn', href: '/signup', style: { textDecoration:'none', color:'var(--primary-text)' } },
         'Sign Up'
       ),
       React.createElement(
         'a',
-        { className: 'btn', href: '/user-auth/login.html', style: { textDecoration:'none', color:'var(--primary-text)' } },
+        { className: 'btn', href: '/login', style: { textDecoration:'none', color:'var(--primary-text)' } },
         'Login'
       )
     )
@@ -29,21 +29,6 @@ root.render(
   React.createElement(
     React.Fragment,
     null,
-    // React.createElement(Navbar),
     React.createElement(MainContent)
   )
 );
-
-
-// function Navbar() {
-//   return React.createElement(
-//     'nav',
-//     { className: 'navbar' },
-//     React.createElement('div', { className: 'logo' }, 'LOGO'),
-//     React.createElement(
-//       'a',
-//       { className: 'login-link', href: '#login' },
-//       'LOGIN/SIGN UP'
-//     )
-//   );
-// }
