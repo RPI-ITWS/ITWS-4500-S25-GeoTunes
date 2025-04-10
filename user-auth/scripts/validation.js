@@ -27,6 +27,10 @@ export function validateSignup(data) {
     errors.email = 'Email is invalid';
     }
 
+    if (data.spotify_id && /[^a-zA-Z0-9_]/.test(data.spotify_id)) {
+        errors.spotify_id = 'Spotify ID must be alphanumeric or underscores only';
+    }      
+
     if (!data.password) {
     errors.password = 'Password is required';
     } else if (data.password.length < 8) {

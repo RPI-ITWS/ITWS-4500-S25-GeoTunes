@@ -172,7 +172,7 @@ app.post('/api/auth/signup', async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      created_at: new Date()
+      spotify_id: req.body.spotify_id || ""
     });
     
     const token = jwt.sign(
@@ -181,11 +181,22 @@ app.post('/api/auth/signup', async (req, res) => {
       { expiresIn: '24h' }
     );
     
-    res.status(201).json({ token, user: { id: result.insertedId.toString(), name, email } });
+    res.status(201).json({ 
+      token, 
+      user: { 
+        id: result.insertedId.toString(), 
+        name, 
+        email, 
+        spotify_id: req.body.spotify_id || "" 
+      } 
+    });
+    console.log("User inserted:", result.insertedId);
+    alert("User inserted:", result.insertedId);
   } catch (error) {
     console.error('Signup error:', error);
     res.status(500).json({ errors: { general: 'Server error during signup' } });
   }
+  
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -202,6 +213,7 @@ app.post('/api/auth/login', async (req, res) => {
     const db = client.db("geotunes");
     const usersCollection = db.collection("users");
     const user = await usersCollection.findOne({ email });
+    console.log(user);
     if (!user) {
       return res.status(400).json({ errors: { general: 'Invalid email or password' } });
     }

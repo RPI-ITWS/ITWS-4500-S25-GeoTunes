@@ -20,8 +20,9 @@ form.addEventListener('submit', async (e) => {
         name: form.name.value.trim(),
         email: form.email.value.trim(),
         password: form.password.value.trim(),
-        confirmPassword: form.confirmPassword.value.trim()
-    };
+        confirmPassword: form.confirmPassword.value.trim(),
+        spotify_id: form.spotify_id?.value.trim() || ""
+    };            
 
     const errors = validateSignup(formData);
     if (Object.keys(errors).length > 0) {
