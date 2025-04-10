@@ -26,73 +26,74 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/addAuth.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'addAuth.js'));
+    res.sendFile(path.join(__dirname, 'addAuth.js'));
 });
 
 const uri = process.env.MONGODB;
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+const client = new MongoClient(uri);
 
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    console.log("Successfully connected to MongoDB!");
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    return client;
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-  }
-}
+const connectToDatabase = async () => {
+    try {
+        await client.connect();
+
+        // Explicitly use the 'geotunes' database
+        const db = client.db("geotunes");
+
+        console.log("Connected to MongoDB!");
+        console.log("Using database:", db.databaseName);
+
+        const collections = await db.listCollections().toArray();
+        console.log("Collections:", collections.map(c => c.name));
+
+        return db;
+    } catch (error) {
+        console.error("Error connecting to MongoDB:", error);
+    }
+};
 connectToDatabase().catch(console.dir);
 
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ errors: { general: 'Access denied. No token provided.' } });
-  }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ errors: { general: 'Access denied. No token provided.' } });
+    }
 
-  try {
-    const verified = jwt.verify(token, JWT_SECRET);
-    req.user = verified;
-    next();
-  } catch (error) {
-    res.status(401).json({ errors: { general: 'Invalid token' } });
-  }
+    try {
+        const verified = jwt.verify(token, JWT_SECRET);
+        req.user = verified;
+        next();
+    } catch (error) {
+        res.status(401).json({ errors: { general: 'Invalid token' } });
+    }
 };
 
 async function getKey() {
-  const db = client.db("geotunes");
-  const collection = db.collection('api_data');
-  const keyDoc = await collection.findOne({}, { projection: { key: 1, _id: 0 } });
-  if (!keyDoc) {
-    return await newKey();
-  }
-  return keyDoc.key;
+    const db = client.db("geotunes");
+    const collection = db.collection('api_data');
+    const keyDoc = await collection.findOne({}, { projection: { key: 1, _id: 0 } });
+    if (!keyDoc) {
+        return await newKey();
+    }
+    return keyDoc.key;
 }
 
 async function newKey() {
-  let key = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    body: "grant_type=client_credentials&client_id=b931d26ffacd40e1bb2a85ff3b82df0e&client_secret=1841d9b707d445d0b4ca9821981c0cc8",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
-  key = await key.json();
-  const db = client.db("geotunes");
-  const collection = db.collection('api_data');
-  await collection.deleteMany({});
-  await collection.insertOne({ "key": key.access_token, "created_at": new Date() });
-  console.log("New key generated:", key.access_token);
-  return key.access_token;
+    let key = await fetch("https://accounts.spotify.com/api/token", {
+        method: "POST",
+        body: "grant_type=client_credentials&client_id=b931d26ffacd40e1bb2a85ff3b82df0e&client_secret=1841d9b707d445d0b4ca9821981c0cc8",
+        headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        },
+    });
+    key = await key.json();
+    const db = client.db("geotunes");
+    const collection = db.collection('api_data');
+    await collection.deleteMany({});
+    await collection.insertOne({ "key": key.access_token, "created_at": new Date() });
+    console.log("New key generated:", key.access_token);
+    return key.access_token;
 }
 
 async function playlistRequest(id) {
@@ -126,7 +127,7 @@ app.get('/city-exploration', (req, res) => {
   res.sendFile(path.join(__dirname, 'cityExploration', 'cityExploration.html'));
 });
 
-app.use('/cityExploration', express.static(path.join(__dirname, 'cityExploration'))); 
+app.use('/cityExploration', express.static(path.join(__dirname, 'cityExploration')));
 
 app.get('/reviews', (req, res) => {
   res.sendFile(path.join(__dirname, 'Reviews', 'reviewPage.html'));
@@ -395,6 +396,43 @@ app.delete('/locale/:locale', authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to delete locale" });
   }
 });
+
+// app.get('/node/info', async (req, res) => {
+app.get('/info', async (req, res) => {
+    try {
+        const city = req.query.city;
+        console.log(city)
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
+
+        const db = client.db("geotunes");
+        const collection = db.collection("location_entries");
+
+        const cityData = await collection.findOne(
+            {
+                cityName: { $regex: city.trim(), $options: 'i' }
+            },
+            {
+                projection: { cityName: 1, description: 1, _id: 0 }
+            }
+        );        
+        console.log(cityData)
+        if (!cityData) {
+            console.log("No match for city:", city);
+            return res.status(404).json({ info: "No information available for this city." });
+        }
+
+        console.log("Found match:", cityData.cityName);
+        res.json({
+            info: `<strong>${cityData.cityName}</strong><br><br>${cityData.description}`
+        });
+
+    } catch (err) {
+        console.error("Error fetching city info:", err);
+        res.status(500).json({ info: "Server error while retrieving city info." });
+    }
+});      
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
