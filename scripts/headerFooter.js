@@ -190,37 +190,36 @@ function run() {
         position: 'absolute',
         top: '100%',
         right: 0,
-        backgroundColor: '#1A365D', // navy
+        backgroundColor: '#1A365D',
         border: '1px solid var(--border-color)',
         borderRadius: '6px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         listStyle: 'none',
         margin: '8px 0 0 0',
-        padding: '0.5rem 0',
+        padding: 0,
         zIndex: 1000,
-        minWidth: '160px',
-        fontFamily: "'Oleo Script', cursive"
-    };            
-
+        minWidth: '180px',
+        fontFamily: "'Oleo Script', cursive",
+        overflow: 'hidden'
+    };
+    
     const dropdownItemStyle = {
-        padding: '0.5rem 1rem'
-    };      
-
+        padding: 0,
+    };
+    
     const dropdownLinkStyle = {
+        display: 'block',
+        padding: '12px 16px',
         textDecoration: 'none',
         color: '#ffffff',
         background: 'none',
         border: 'none',
         cursor: 'pointer',
         font: 'inherit',
-        width: '100%',
         textAlign: 'left',
         transition: 'background 0.3s ease',
         fontFamily: "'Oleo Script', cursive"
-    };      
-
-    
-    
+    };    
 
     const footerStyle = {
         backgroundColor: '#755146',
