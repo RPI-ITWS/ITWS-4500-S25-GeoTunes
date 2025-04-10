@@ -102,49 +102,47 @@ function CityExplorationApp() {
     }
 
     function loadTabContent(tab, cityName) {
-    if (tab === "spotify") {
-        fetch("/node/spotify?city=" + encodeURIComponent(cityName))
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-          setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><div id='embed-iframe'></div>");
-          window.onSpotifyIframeApiReady = (IFrameAPI) => {
-            const element = document.getElementById('embed-iframe');
-            const options = {
-              uri: `${data.external_urls.spotify}`
-            };
-            const callback = (EmbedController) => { };
-            IFrameAPI.createController(element, options, callback);
-          };
-        })
-        .catch(function (err) {
-            console.error(err);
-            setTabContent("Error loading Spotify playlist.");
-        });
-    } else if (tab === "info") {
-        fetch("/node/info?city=" + encodeURIComponent(cityName))
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-            // TODO: Replace with actual city information from the database.
-            setTabContent("<h4>Information about " + cityName + "</h4><p>" +
-            (data.info || "No information available.") + "</p>");
-        })
-        .catch(function (err) {
-            console.error(err);
-            setTabContent("Error loading information.");
-        });
-    } else if (tab === "events") {
-        fetch("/node/events?city=" + encodeURIComponent(cityName))
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-            setTabContent("<h4>Events in " + cityName + "</h4><p>" +
-            (data.events || "No events available.") + "</p>");
-        })
-        .catch(function (err) {
-            console.error(err);
-            setTabContent("Error loading events.");
-        });
-    }
-    }
+        if (tab === "spotify") {
+            fetch("/spotify?city=" + encodeURIComponent(cityName))
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><div id='embed-iframe'></div>");
+                    window.onSpotifyIframeApiReady = (IFrameAPI) => {
+                        const element = document.getElementById('embed-iframe');
+                        const options = {
+                            uri: `${data.external_urls.spotify}`
+                        };
+                        const callback = (EmbedController) => { };
+                        IFrameAPI.createController(element, options, callback);
+                    };
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    setTabContent("Error loading Spotify playlist.");
+                });
+        } else if (tab === "info") {
+            fetch("/info?city=" + encodeURIComponent(cityName))
+            .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    setTabContent("<div>" + (data.info || "No information available.") + "</div>");
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    setTabContent("Error loading information.");
+                });
+        } else if (tab === "events") {
+            fetch("/events?city=" + encodeURIComponent(cityName))
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    setTabContent("<h4>Events in " + cityName + "</h4><p>" +
+                        (data.events || "No events available.") + "</p>");
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    setTabContent("Error loading events.");
+                });
+        }
+    }    
 
     function handleSearch() {
     if (city.trim() === "") {
@@ -240,7 +238,7 @@ function CityExplorationApp() {
         ),
         React.createElement("div", {
             className: "tab-content",
-            style: { border: "1px solid #2A2A2A", padding: "10px", height: "300px", overflowY: "auto" },
+            style: { border: "1px solid #2A2A2A", padding: "10px", height: "300px", overflowY: "auto", backgroundColor: "#f0ece6", borderRadius: '15px' },
             dangerouslySetInnerHTML: { __html: tabContent },
         })
         )
