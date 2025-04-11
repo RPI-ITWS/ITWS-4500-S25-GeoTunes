@@ -43,8 +43,6 @@ const connectToDatabase = async () => {
         console.log("Using database:", db.databaseName);
 
         const collections = await db.listCollections().toArray();
-        console.log("Collections:", collections.map(c => c.name));
-
         return db;
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
@@ -122,8 +120,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/city-exploration', (req, res) => {
-    console.log('Serving city exploration page');
-    console.log('Path:', path.join(__dirname, 'cityExploration', 'cityExploration.html'));
+    // console.log('Serving city exploration page');
+    // console.log('Path:', path.join(__dirname, 'cityExploration', 'cityExploration.html'));
     res.sendFile(path.join(__dirname, 'cityExploration', 'cityExploration.html'));
 });
 
@@ -192,7 +190,6 @@ app.post('/api/auth/signup', async (req, res) => {
         } 
         });
         console.log("User inserted:", result.insertedId);
-        alert("User inserted:", result.insertedId);
     } catch (error) {
         console.error('Signup error:', error);
         res.status(500).json({ errors: { general: 'Server error during signup' } });
@@ -416,7 +413,6 @@ app.get('/info', async (req, res) => {
                 projection: { cityName: 1, description: 1, _id: 0 }
             }
         );        
-        console.log(cityData)
         if (!cityData) {
             console.log("No match for city:", city);
             return res.status(404).json({ info: "No information available for this city." });
@@ -432,6 +428,28 @@ app.get('/info', async (req, res) => {
         res.status(500).json({ info: "Server error while retrieving city info." });
     }
 });      
+
+// app.get('/node/events', async (req, res) => {
+app.get('/events', async (req, res) => {
+    try {
+    const city = req.query.city;
+    if (!city) {
+        return res.status(400).json({ error: "City name is required" });
+    }
+
+    const db = client.db("geotunes");
+    const eventsCollection = db.collection("events");
+
+    const events = await eventsCollection.find({
+        "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
+    }).toArray();
+
+    res.json({ events });
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ error: "Server error fetching events" });
+    }
+});
 
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });

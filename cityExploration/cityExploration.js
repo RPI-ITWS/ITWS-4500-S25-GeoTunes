@@ -131,11 +131,33 @@ function CityExplorationApp() {
                     setTabContent("Error loading information.");
                 });
         } else if (tab === "events") {
+            // fetch("/node/events?city=" + encodeURIComponent(cityName))
             fetch("/events?city=" + encodeURIComponent(cityName))
                 .then(function (response) { return response.json(); })
                 .then(function (data) {
-                    setTabContent("<h4>Events in " + cityName + "</h4><p>" +
-                        (data.events || "No events available.") + "</p>");
+                    if (!data.events || data.events.length === 0) {
+                        setTabContent(`<h4>Events in ${cityName}</h4><p>No events available.</p>`);
+                        return;
+                    }
+
+                    let html = `<h4>Events in ${cityName}</h4>`;
+                    html += '<ul style="list-style: none; padding: 0;">';
+
+                    data.events.forEach(function (event) {
+                        html += `
+                            <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                                <strong>${event.name}</strong><br>
+                                <em>${event.date} at ${event.time}</em><br>
+                                Location: ${event.location.address}<br>
+                                Cost: ${event.cost}<br>
+                                Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
+                                <p style="margin-top: 5px;">${event.description}</p>
+                            </li>
+                        `;
+                    });
+
+                    html += '</ul>';
+                    setTabContent(html);
                 })
                 .catch(function (err) {
                     console.error(err);

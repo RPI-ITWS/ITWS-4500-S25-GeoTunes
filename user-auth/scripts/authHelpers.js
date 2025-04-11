@@ -8,7 +8,7 @@ export function handleSuccessfulAuth(userData) {
         localStorage.setItem('user', JSON.stringify(userData.user));
     }
     resetInactivityTimer();
-    const intendedUrl = localStorage.getItem('intendedUrl') || '/';
+    const intendedUrl = localStorage.getItem('intendedUrl') || '/city-exploration';
     localStorage.removeItem('intendedUrl');
     window.location.href = intendedUrl;
 }
