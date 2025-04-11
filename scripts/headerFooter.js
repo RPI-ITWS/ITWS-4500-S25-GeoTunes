@@ -60,16 +60,16 @@ function run() {
             style: headerStyle
         },
             React.createElement('div', { className: 'logo' },
-                React.createElement('a', { href: '/' },
+                React.createElement('a', { href: isLoggedIn ? '/city-exploration' : '/' },
                     React.createElement('img', {
-                        src: '/assets/logo.png',
+                        src: '/scripts/logo.png',
                         alt: "GeoTunes Logo",
                         style: { height: '50px' }
                     })
                 )
             ),
             React.createElement('h1', { style: titleStyle },
-                React.createElement('a', { href: '/city-exploration', style: titleLinkStyle }, 'GeoTunes')
+                React.createElement('a', { href: isLoggedIn ? '/city-exploration' : '/', style: titleLinkStyle }, 'GeoTunes')
             ),
             React.createElement('div', { className: 'auth-controls' },
                 isLoggedIn ? createDropdown() : createLoginButton()
@@ -174,41 +174,52 @@ function run() {
     };
 
     const dropdownButtonStyle = {
-        backgroundColor: 'transparent',
+        padding: '8px 16px',
+        backgroundColor: 'var(--coral-pink)',
+        color: '#fff',
         border: 'none',
-        color: 'var(--primary-text)',
+        borderRadius: '4px',
+        cursor: 'pointer',
         fontWeight: 'bold',
-        cursor: 'pointer'
-    };
+        textDecoration: 'none',
+        transition: 'var(--transition-default)',
+        fontFamily: "'Oleo Script', cursive"
+    };    
 
     const dropdownMenuStyle = {
         position: 'absolute',
         top: '100%',
         right: 0,
-        backgroundColor: '#fff',
+        backgroundColor: '#1A365D',
         border: '1px solid var(--border-color)',
-        borderRadius: '4px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        borderRadius: '6px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         listStyle: 'none',
-        margin: 0,
-        padding: '5px 0',
-        zIndex: 1000
+        margin: '8px 0 0 0',
+        padding: 0,
+        zIndex: 1000,
+        minWidth: '180px',
+        fontFamily: "'Oleo Script', cursive",
+        overflow: 'hidden'
     };
-
+    
     const dropdownItemStyle = {
-        padding: '8px 16px'
+        padding: 0,
     };
-
+    
     const dropdownLinkStyle = {
+        display: 'block',
+        padding: '12px 16px',
         textDecoration: 'none',
-        color: 'var(--primary-text)',
+        color: '#ffffff',
         background: 'none',
         border: 'none',
         cursor: 'pointer',
         font: 'inherit',
-        width: '100%',
-        textAlign: 'left'
-    };
+        textAlign: 'left',
+        transition: 'background 0.3s ease',
+        fontFamily: "'Oleo Script', cursive"
+    };    
 
     const footerStyle = {
         backgroundColor: '#755146',
@@ -288,6 +299,12 @@ function addStickyFooterStyles() {
                 margin-bottom: 20px;
             }
         `;
+        style.innerHTML += `
+            .dropdown-menu li:hover {
+                background-color: var(--coral-pink);
+            }
+        `;
+
         document.head.appendChild(style);
     }
 }

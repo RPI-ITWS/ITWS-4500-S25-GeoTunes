@@ -4,11 +4,10 @@ export function handleSuccessfulAuth(userData) {
     if (userData && userData.token) {
         api.setToken(userData.token);
     }
-    
     if (userData && userData.user) {
         localStorage.setItem('user', JSON.stringify(userData.user));
     }
-    
+    resetInactivityTimer();
     const intendedUrl = localStorage.getItem('intendedUrl') || '/';
     localStorage.removeItem('intendedUrl');
     window.location.href = intendedUrl;
@@ -31,6 +30,8 @@ export function getCurrentUser() {
 export function logout() {
     api.clearToken();
     localStorage.removeItem('user');
+    localStorage.removeItem('intendedUrl');
+    clearTimeout(window.__logoutTimeout);
     window.location.href = '/login';
 }
 
@@ -46,3 +47,19 @@ export function requireAuth() {
     }
     return true;
 }
+
+export function resetInactivityTimer() {
+    clearTimeout(window.__logoutTimeout);
+    window.__logoutTimeout = setTimeout(() => {
+        alert('Session expired due to inactivity. Logging out.');
+        logout();
+    }, 30 * 60 * 1000); // 30 minutes
+}
+
+['click', 'mousemove', 'keydown', 'scroll'].forEach(evt => {
+    window.addEventListener(evt, () => {
+        if (isAuthenticated()) {
+            resetInactivityTimer();
+        }
+    });
+});
