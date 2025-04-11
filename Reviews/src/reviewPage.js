@@ -1,6 +1,6 @@
 'use strict';
 
-function CityExploration() {
+function Reviws() {
     const [review, setReview] = React.useState("");
     const [reviews, setReviews] = React.useState([]);
 
@@ -86,6 +86,6 @@ root.render(
     React.createElement(
         React.Fragment,
         null,
-        React.createElement(CityExploration)
+        React.createElement(Reviews)
     )
 );
