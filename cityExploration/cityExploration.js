@@ -1,3 +1,8 @@
+import { requireAuth } from '/user-auth/scripts/authHelpers.js';
+
+if (!requireAuth()) {
+    throw new Error('Unauthorized');
+}
 
 function CityExplorationApp() {
     var _a = React.useState(""), city = _a[0], setCity = _a[1];

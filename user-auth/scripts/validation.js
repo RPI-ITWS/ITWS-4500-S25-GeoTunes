@@ -9,8 +9,6 @@ export function validateLogin(data) {
 
     if (!data.password) {
     errors.password = 'Password is required';
-    } else if (data.password.length < 8) {
-    errors.password = 'Password must be at least 8 characters';
     }
 
     return errors;
@@ -28,6 +26,10 @@ export function validateSignup(data) {
     } else if (!/\S+@\S+\.\S+/.test(data.email)) {
     errors.email = 'Email is invalid';
     }
+
+    if (data.spotify_id && /[^a-zA-Z0-9_]/.test(data.spotify_id)) {
+        errors.spotify_id = 'Spotify ID must be alphanumeric or underscores only';
+    }      
 
     if (!data.password) {
     errors.password = 'Password is required';
