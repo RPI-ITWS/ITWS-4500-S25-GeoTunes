@@ -102,49 +102,69 @@ function CityExplorationApp() {
     }
 
     function loadTabContent(tab, cityName) {
-    if (tab === "spotify") {
-        fetch("/node/spotify?city=" + encodeURIComponent(cityName))
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-          setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><div id='embed-iframe'></div>");
-          window.onSpotifyIframeApiReady = (IFrameAPI) => {
-            const element = document.getElementById('embed-iframe');
-            const options = {
-              uri: `${data.external_urls.spotify}`
-            };
-            const callback = (EmbedController) => { };
-            IFrameAPI.createController(element, options, callback);
-          };
-        })
-        .catch(function (err) {
-            console.error(err);
-            setTabContent("Error loading Spotify playlist.");
-        });
-    } else if (tab === "info") {
-        fetch("/node/info?city=" + encodeURIComponent(cityName))
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-            // TODO: Replace with actual city information from the database.
-            setTabContent("<h4>Information about " + cityName + "</h4><p>" +
-            (data.info || "No information available.") + "</p>");
-        })
-        .catch(function (err) {
-            console.error(err);
-            setTabContent("Error loading information.");
-        });
-    } else if (tab === "events") {
-        fetch("/node/events?city=" + encodeURIComponent(cityName))
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-            setTabContent("<h4>Events in " + cityName + "</h4><p>" +
-            (data.events || "No events available.") + "</p>");
-        })
-        .catch(function (err) {
-            console.error(err);
-            setTabContent("Error loading events.");
-        });
-    }
-    }
+        if (tab === "spotify") {
+            fetch("/spotify?city=" + encodeURIComponent(cityName))
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    setTabContent("<h4>Spotify Playlist for " + cityName + "</h4><div id='embed-iframe'></div>");
+                    window.onSpotifyIframeApiReady = (IFrameAPI) => {
+                        const element = document.getElementById('embed-iframe');
+                        const options = {
+                            uri: `${data.external_urls.spotify}`
+                        };
+                        const callback = (EmbedController) => { };
+                        IFrameAPI.createController(element, options, callback);
+                    };
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    setTabContent("Error loading Spotify playlist.");
+                });
+        } else if (tab === "info") {
+            fetch("/info?city=" + encodeURIComponent(cityName))
+            .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    setTabContent("<div>" + (data.info || "No information available.") + "</div>");
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    setTabContent("Error loading information.");
+                });
+        } else if (tab === "events") {
+            // fetch("/node/events?city=" + encodeURIComponent(cityName))
+            fetch("/events?city=" + encodeURIComponent(cityName))
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    if (!data.events || data.events.length === 0) {
+                        setTabContent(`<h4>Events in ${cityName}</h4><p>No events available.</p>`);
+                        return;
+                    }
+
+                    let html = `<h4>Events in ${cityName}</h4>`;
+                    html += '<ul style="list-style: none; padding: 0;">';
+
+                    data.events.forEach(function (event) {
+                        html += `
+                            <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                                <strong>${event.name}</strong><br>
+                                <em>${event.date} at ${event.time}</em><br>
+                                Location: ${event.location.address}<br>
+                                Cost: ${event.cost}<br>
+                                Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
+                                <p style="margin-top: 5px;">${event.description}</p>
+                            </li>
+                        `;
+                    });
+
+                    html += '</ul>';
+                    setTabContent(html);
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    setTabContent("Error loading events.");
+                });
+        }
+    }    
 
     function handleSearch() {
     if (city.trim() === "") {
@@ -174,83 +194,145 @@ function CityExplorationApp() {
     }
 
     return React.createElement(
-    "div",
-    { className: "container", style: { width: "90%", margin: "0 auto" } },
-    React.createElement(
+        "div",
+        { className: "container", style: { width: "90%", margin: "0 auto" } },
+        React.createElement(
         "div",
         { className: "search-bar", style: { textAlign: "center", margin: "20px 0" } },
         React.createElement("input", {
-        type: "text",
-        id: "search-input",
-        placeholder: "Enter city name",
-        value: city,
-        onChange: function (e) { setCity(e.target.value); },
-        style: { padding: "0.5rem", width: "250px" },
+            type: "text",
+            id: "search-input",
+            placeholder: "Enter city name",
+            value: city,
+            onChange: function (e) { setCity(e.target.value); },
+            style: {
+            padding: "0.5rem",
+            width: "250px",
+            border: "1px solid var(--border-color)",
+            borderRadius: "6px"
+            }
         }),
         React.createElement(
-        "button",
-        { id: "search-btn", style: { padding: "0.5rem", marginLeft: "10px" }, onClick: handleSearch },
-        "Search"
+            "button",
+            {
+            id: "search-btn",
+            style: {
+                padding: "0.5rem 1rem",
+                marginLeft: "10px",
+                backgroundColor: "var(--coral-pink)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer"
+            },
+            onClick: handleSearch
+            },
+            "Search"
         )
-    ),
-    React.createElement(
-        "div",
-        {
-        className: "city-content-container",
-        style: { display: "flex", justifyContent: "space-between", marginBottom: "20px"},
-        },
-        React.createElement(
-        "div",
-        { className: "map-section", style: { flex: 1, marginRight: "10px" } },
-        React.createElement("div", { id: "map", style: { height: "300px", backgroundColor: "#ddd" } })
         ),
         React.createElement(
         "div",
-        { className: "right-panel", style: { flex: 1, marginLeft: "10px", display: "flex", flexDirection: "column" } },
+        {
+            className: "city-content-container",
+            style: {
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "20px",
+            // background: "clear",
+            padding: "20px",
+            borderRadius: "12px",
+            // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
+            }
+        },
         React.createElement(
+            "div",
+            { className: "map-section", style: { flex: 1, margin: "10px", height: "400px" } },
+            React.createElement("div", {
+            id: "map",
+            style: {
+                height: "100%",
+                backgroundColor: "#ddd",
+                borderRadius: "12px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                border: "1px solid var(--border-color)"
+            }
+            })
+        ),
+        React.createElement(
+            "div",
+            { className: "right-panel", style: { flex: 1, margin: "10px", height: "400px", display: "flex", flexDirection: "column" } },
+            React.createElement(
             "div",
             { className: "tabs", style: { display: "flex", justifyContent: "space-around", marginBottom: "10px" } },
             React.createElement(
-            "button",
-            {
+                "button",
+                {
                 className: "tab-btn" + (activeTab === "spotify" ? " active" : ""),
                 onClick: function () { handleTabClick("spotify"); },
-                style: { flex: 1, padding: "10px", backgroundColor: activeTab === "spotify" ? "#FF6B6B" : "#1A365D", color: "white", border: "none", cursor: "pointer" },
-            },
-            "Spotify Playlist"
+                style: {
+                    flex: 1,
+                    padding: "10px",
+                    backgroundColor: activeTab === "spotify" ? "#FF6B6B" : "#1A365D",
+                    color: "white",
+                    border: "none",
+                    cursor: "pointer"
+                }
+                },
+                "Spotify Playlist"
             ),
             React.createElement(
-            "button",
-            {
+                "button",
+                {
                 className: "tab-btn" + (activeTab === "info" ? " active" : ""),
                 onClick: function () { handleTabClick("info"); },
-                style: { flex: 1, padding: "10px", backgroundColor: activeTab === "info" ? "#FF6B6B" : "#1A365D", color: "white", border: "none", cursor: "pointer" },
-            },
-            "Information"
+                style: {
+                    flex: 1,
+                    padding: "10px",
+                    backgroundColor: activeTab === "info" ? "#FF6B6B" : "#1A365D",
+                    color: "white",
+                    border: "none",
+                    cursor: "pointer"
+                }
+                },
+                "Information"
             ),
             React.createElement(
-            "button",
-            {
+                "button",
+                {
                 className: "tab-btn" + (activeTab === "events" ? " active" : ""),
                 onClick: function () { handleTabClick("events"); },
-                style: { flex: 1, padding: "10px", backgroundColor: activeTab === "events" ? "#FF6B6B" : "#1A365D", color: "white", border: "none", cursor: "pointer" },
-            },
-            "Events"
+                style: {
+                    flex: 1,
+                    padding: "10px",
+                    backgroundColor: activeTab === "events" ? "#FF6B6B" : "#1A365D",
+                    color: "white",
+                    border: "none",
+                    cursor: "pointer"
+                }
+                },
+                "Events"
             )
-        ),
-        React.createElement("div", {
+            ),
+            React.createElement("div", {
             className: "tab-content",
-            style: { border: "1px solid #2A2A2A", padding: "10px", height: "300px", overflowY: "auto" },
-            dangerouslySetInnerHTML: { __html: tabContent },
-        })
+            style: {
+                border: "1px solid #2A2A2A",
+                padding: "10px",
+                height: "100%",
+                overflowY: "auto",
+                borderRadius: "8px",
+                background: "#fdfdfd"
+            },
+            dangerouslySetInnerHTML: { __html: tabContent }
+            })
         )
-    ),
-    React.createElement(
+        ),
+        React.createElement(
         "div",
         { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
         React.createElement("a", {
-        href: "/add-song",
-        style: {
+            href: "/add-song",
+            style: {
             display: "inline-block",
             padding: "0.75rem 1.5rem",
             backgroundColor: "#1A365D",
@@ -258,11 +340,11 @@ function CityExplorationApp() {
             borderRadius: "4px",
             margin: "0 10px",
             textDecoration: "none"
-        }
+            }
         }, "Add to Playlist"),
         React.createElement("a", {
-        href: "/reviews",
-        style: {
+            href: "/reviews",
+            style: {
             display: "inline-block",
             padding: "0.75rem 1.5rem",
             backgroundColor: "#1A365D",
@@ -270,10 +352,10 @@ function CityExplorationApp() {
             borderRadius: "4px",
             margin: "0 10px",
             textDecoration: "none"
-        }
+            }
         }, "Leave a Review")
-    )
-    );
+        )
+    );      
 }
 
 ReactDOM.render(
