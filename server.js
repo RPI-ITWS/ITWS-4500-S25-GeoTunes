@@ -171,7 +171,8 @@ app.post('/api/auth/signup', async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        spotify_id: req.body.spotify_id || ""
+        spotify_id: req.body.spotify_id || "",
+        savedEvents: []
         });
         
         const token = jwt.sign(
@@ -450,6 +451,48 @@ app.get('/events', async (req, res) => {
         res.status(500).json({ error: "Server error fetching events" });
     }
 });
+
+app.post('/api/user/events', authenticateToken, async (req, res) => {
+    try {
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+        const events = db.collection("events");
+
+        const { eventId } = req.body;
+        if (!eventId) return res.status(400).json({ error: "Event ID is required" });
+
+        const eventObjId = new ObjectId(eventId);
+        const event = await events.findOne({ _id: eventObjId });
+        if (!event) return res.status(404).json({ error: "Event not found" });
+
+        const updateResult = await users.updateOne(
+        { _id: new ObjectId(req.user.id) },
+        { $addToSet: { savedEvents: eventObjId } } // prevents duplicates
+        );
+
+        res.json({ message: "Event saved", updateResult });
+    } catch (error) {
+        console.error("Error saving event:", error);
+        res.status(500).json({ error: "Failed to save event" });
+    }
+});
+
+app.get('/api/user/events', authenticateToken, async (req, res) => {
+    try {
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+        const events = db.collection("events");
+
+        const user = await users.findOne({ _id: new ObjectId(req.user.id) });
+        if (!user || !user.savedEvents) return res.json({ savedEvents: [] });
+
+        const savedEvents = await events.find({ _id: { $in: user.savedEvents } }).toArray();
+        res.json({ savedEvents });
+    } catch (error) {
+        console.error("Error retrieving saved events:", error);
+        res.status(500).json({ error: "Failed to retrieve saved events" });
+    }
+});  
 
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
