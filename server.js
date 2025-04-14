@@ -439,19 +439,19 @@ app.get('/info', async (req, res) => {
 // app.get('/node/events', async (req, res) => {
 app.get('/events', async (req, res) => {
     try {
-    const city = req.query.city;
-    if (!city) {
-        return res.status(400).json({ error: "City name is required" });
-    }
+        const city = req.query.city;
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
 
-    const db = client.db("geotunes");
-    const eventsCollection = db.collection("events");
+        const db = client.db("geotunes");
+        const eventsCollection = db.collection("events");
 
-    const events = await eventsCollection.find({
-        "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
-    }).toArray();
+        const events = await eventsCollection.find({
+            "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
+        }).toArray();
 
-    res.json({ events });
+        res.json({ events });
     } catch (error) {
         console.error("Error fetching events:", error);
         res.status(500).json({ error: "Server error fetching events" });

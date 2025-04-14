@@ -9,7 +9,6 @@ if (!requireAuth()) {
 
 document.addEventListener('DOMContentLoaded', () => {
     api.setToken(localStorage.getItem('authToken'));
-    console.log("Auth token at profile load:", localStorage.getItem('authToken'));
     const form = document.getElementById('profile-form');
     const statusMessage = document.getElementById('status-message');
     const deleteBtn = document.getElementById('delete-account-button');
