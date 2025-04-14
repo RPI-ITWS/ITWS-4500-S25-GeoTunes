@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeoTunes - Profile</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+    <link rel="stylesheet" href="/styles/components.css" />
+    <link rel="stylesheet" href="/styles/auth.css" />
+</head>
+<body>
+    <div id="header-root"></div>
+
+    <main style="margin-top: 70px;">
+        <div class="auth-container">
+            <div style="margin-bottom: 30px;" class="auth-form-wrapper" style="width: 50%;">
+                <h1>Your Profile</h1>
+                <div id="status-message" class="status-message" style="display:none;"></div>
+                <form id="profile-form">
+                    <div class="input-field">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required />
+                    </div>
+                    <div class="input-field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required />
+                    </div>
+                    <div class="input-field">
+                        <label for="spotify_id">Spotify ID</label>
+                        <input type="text" id="spotify_id" name="spotify_id" />
+                    </div>
+                    <button type="submit" id="update-button">Update Profile</button>
+                </form>
+
+                <hr style="margin: 2rem 0;" />
+
+                <button id="delete-account-button" style="background-color: var(--error-red);">Delete Account</button>
+
+                <h2 style="margin-top: 2rem;">Saved Events</h2>
+                <div id="saved-events"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script type="module" src="/scripts/headerFooter.js"></script>
+    <script type="module" src="/profile/profile.js"></script>
+</body>
+</html>
