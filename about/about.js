@@ -19,7 +19,7 @@ function AboutContent() {
       {
         style: {
           color: '#FF6B6B',
-          fontSize: '2.5rem',
+          fontSize: '3rem',
           marginBottom: '1rem',
           textAlign: 'center'
         }
