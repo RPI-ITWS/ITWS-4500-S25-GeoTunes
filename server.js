@@ -128,11 +128,17 @@ app.get('/city-exploration', (req, res) => {
 app.use('/cityExploration', express.static(path.join(__dirname, 'cityExploration')));
 
 app.get('/reviews', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Reviews', 'reviewPage.html'));
+    res.sendFile(path.join(__dirname, 'Reviews', 'reviewPage.html'));
+});
+
+app.use('/profile', express.static(path.join(__dirname, 'profile')));
+
+app.get('/profile', (req, res) => {
+    res.sendFile(path.join(__dirname, 'profile', 'profile.html'));
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'user-auth', 'login.html'));
+    res.sendFile(path.join(__dirname, 'user-auth', 'login.html'));
 });
 
 app.get('/signup', (req, res) => {
@@ -171,7 +177,8 @@ app.post('/api/auth/signup', async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        spotify_id: req.body.spotify_id || ""
+        spotify_id: req.body.spotify_id || "",
+        savedEvents: []
         });
         
         const token = jwt.sign(
@@ -432,22 +439,132 @@ app.get('/info', async (req, res) => {
 // app.get('/node/events', async (req, res) => {
 app.get('/events', async (req, res) => {
     try {
-    const city = req.query.city;
-    if (!city) {
-        return res.status(400).json({ error: "City name is required" });
-    }
+        const city = req.query.city;
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
 
-    const db = client.db("geotunes");
-    const eventsCollection = db.collection("events");
+        const db = client.db("geotunes");
+        const eventsCollection = db.collection("events");
 
-    const events = await eventsCollection.find({
-        "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
-    }).toArray();
+        const events = await eventsCollection.find({
+            "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
+        }).toArray();
 
-    res.json({ events });
+        res.json({ events });
     } catch (error) {
         console.error("Error fetching events:", error);
         res.status(500).json({ error: "Server error fetching events" });
+    }
+});
+
+app.post('/api/user/events', authenticateToken, async (req, res) => {
+    try {
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+        const events = db.collection("events");
+
+        const { eventId } = req.body;
+        if (!eventId) return res.status(400).json({ error: "Event ID is required" });
+
+        const eventObjId = new ObjectId(eventId);
+        const event = await events.findOne({ _id: eventObjId });
+        if (!event) return res.status(404).json({ error: "Event not found" });
+
+        const updateResult = await users.updateOne(
+        { _id: new ObjectId(req.user.id) },
+        { $addToSet: { savedEvents: eventObjId } } // prevents duplicates
+        );
+
+        res.json({ message: "Event saved", updateResult });
+    } catch (error) {
+        console.error("Error saving event:", error);
+        res.status(500).json({ error: "Failed to save event" });
+    }
+});
+
+app.get('/api/user/events', authenticateToken, async (req, res) => {
+    try {
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+        const events = db.collection("events");
+
+        const user = await users.findOne({ _id: new ObjectId(req.user.id) });
+        if (!user || !user.savedEvents) return res.json({ savedEvents: [] });
+
+        const savedEvents = await events.find({ _id: { $in: user.savedEvents } }).toArray();
+        res.json({ savedEvents });
+    } catch (error) {
+        console.error("Error retrieving saved events:", error);
+        res.status(500).json({ error: "Failed to retrieve saved events" });
+    }
+});
+
+app.put('/api/user/profile', authenticateToken, async (req, res) => {
+    try {
+        const { name, email, spotify_id } = req.body;
+
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+
+        const updateFields = {};
+        if (name) updateFields.name = name;
+        if (email) updateFields.email = email;
+        if (spotify_id !== undefined) updateFields.spotify_id = spotify_id;
+
+        const result = await users.updateOne(
+            { _id: new ObjectId(req.user.id) },
+            { $set: updateFields }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(400).json({ error: "No changes made to profile" });
+        }
+
+        res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ error: "Failed to update profile" });
+    }
+});
+
+app.delete('/api/user/profile', authenticateToken, async (req, res) => {
+    try {
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+
+        const result = await users.deleteOne({ _id: new ObjectId(req.user.id) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "User not found or already deleted" });
+        }
+
+        res.json({ message: "User account deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({ error: "Failed to delete account" });
+    }
+});
+
+app.delete('/api/user/events/:id', authenticateToken, async (req, res) => {
+    try {
+        const eventId = req.params.id;
+        const db = client.db("geotunes");
+        const users = db.collection("users");
+
+        const result = await users.updateOne(
+            { _id: new ObjectId(req.user.id) },
+            { $pull: { savedEvents: new ObjectId(eventId) } }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ error: "Event not found in saved list" });
+        }
+
+        res.json({ message: "Event removed from saved list" });
+    } catch (error) {
+        console.error("Error removing event:", error);
+        res.status(500).json({ error: "Failed to remove event" });
     }
 });
 

@@ -130,40 +130,68 @@ function CityExplorationApp() {
                     console.error(err);
                     setTabContent("Error loading information.");
                 });
-        } else if (tab === "events") {
-            // fetch("/node/events?city=" + encodeURIComponent(cityName))
-            fetch("/events?city=" + encodeURIComponent(cityName))
-                .then(function (response) { return response.json(); })
-                .then(function (data) {
-                    if (!data.events || data.events.length === 0) {
-                        setTabContent(`<h4>Events in ${cityName}</h4><p>No events available.</p>`);
-                        return;
-                    }
-
-                    let html = `<h4>Events in ${cityName}</h4>`;
-                    html += '<ul style="list-style: none; padding: 0;">';
-
-                    data.events.forEach(function (event) {
-                        html += `
-                            <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-                                <strong>${event.name}</strong><br>
-                                <em>${event.date} at ${event.time}</em><br>
-                                Location: ${event.location.address}<br>
-                                Cost: ${event.cost}<br>
-                                Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
-                                <p style="margin-top: 5px;">${event.description}</p>
-                            </li>
-                        `;
+            } else if (tab === "events") {
+                fetch("/events?city=" + encodeURIComponent(cityName))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.events || data.events.length === 0) {
+                            setTabContent(`<h4>Events in ${cityName}</h4><p>No events available.</p>`);
+                            return;
+                        }
+            
+                        let html = `<h4>Events in ${cityName}</h4><ul style="list-style: none; padding: 0;">`;
+            
+                        data.events.forEach(event => {
+                            html += `
+                                <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                                    <strong>${event.name}</strong><br>
+                                    <em>${event.date} at ${event.time}</em><br>
+                                    Location: ${event.location.address}<br>
+                                    Cost: ${event.cost}<br>
+                                    Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
+                                    <p style="margin-top: 5px;">${event.description}</p>
+                                    <button class="save-event-btn" data-id="${event._id}" style="margin-top: 10px; padding: 5px 10px; background-color: var(--emerald-green); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                        Save
+                                    </button>
+                                </li>
+                            `;
+                        });
+            
+                        html += '</ul>';
+                        setTabContent(html);
+            
+                        setTimeout(() => {
+                            document.querySelectorAll('.save-event-btn').forEach(btn => {
+                                btn.addEventListener('click', async () => {
+                                    const eventId = btn.getAttribute('data-id');
+                                    try {
+                                        const response = await fetch('/api/user/events', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                            },
+                                            body: JSON.stringify({ eventId })
+                                        });
+                                        const result = await response.json();
+                                        if (response.ok) {
+                                            alert("Event saved!");
+                                        } else {
+                                            alert(result.error || "Failed to save event");
+                                        }
+                                    } catch (err) {
+                                        alert("Server error while saving event.");
+                                        console.error(err);
+                                    }
+                                });
+                            });
+                        }, 100);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        setTabContent("Error loading events.");
                     });
-
-                    html += '</ul>';
-                    setTabContent(html);
-                })
-                .catch(function (err) {
-                    console.error(err);
-                    setTabContent("Error loading events.");
-                });
-        }
+            }            
     }    
 
     function handleSearch() {
