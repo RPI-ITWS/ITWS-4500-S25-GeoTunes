@@ -349,6 +349,13 @@ app.get('/locale/:locale', async (req, res) => {
     }
 });
 
+app.use('/about', express.static(path.join(__dirname, 'about')));
+
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(__dirname, 'about', 'about.html'));
+});
+
+
 app.post('/locale/:locale', authenticateToken, async (req, res) => {
     try {
         const { locale } = req.params;
