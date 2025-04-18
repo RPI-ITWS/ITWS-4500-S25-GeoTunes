@@ -451,6 +451,12 @@ app.get('/events', async (req, res) => {
     }
 });
 
+app.use('/contact', express.static(path.join(__dirname, 'contactUs')));
+
+app.get('/contact', (req, res) => {
+  res.sendFile(path.join(__dirname, 'contactUs', 'contact.html'));
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
 });

@@ -90,6 +90,7 @@ function run() {
                     style: dropdownMenuStyle
                 },
                     createDropdownItem('/profile', 'Profile'),
+                    createDropdownItem('/contact', 'Contact Us'),
                     React.createElement('li', { style: dropdownItemStyle },
                         React.createElement('button', {
                             onClick: handleLogout,
