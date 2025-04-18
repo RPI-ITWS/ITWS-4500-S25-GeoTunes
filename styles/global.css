@@ -26,6 +26,7 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
+    overflow-x: hidden;
 }
 
 #root {
@@ -38,4 +39,21 @@ html, body {
 button a {
     text-decoration: none; 
     color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .city-content-container {
+        flex-direction: column;
+    }
+
+    .map-section,
+    .right-panel {
+        width: 100%;
+        margin: 0 0 20px 0;
+        height: 300px;
+    }
+
+    .tabs button {
+        font-size: 0.9rem;
+    }
 }

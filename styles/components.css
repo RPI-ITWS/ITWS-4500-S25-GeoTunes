@@ -119,3 +119,14 @@ button:disabled {
     font-size: 0.9em;
     margin-left: 15px;
 }
+
+@media (max-width: 768px) {
+    .playlist-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .song-title, .song-artist, .song-date {
+        margin: 5px 0;
+    }
+}
