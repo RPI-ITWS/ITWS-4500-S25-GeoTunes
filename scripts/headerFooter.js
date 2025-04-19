@@ -43,49 +43,15 @@ function run() {
                 }
             });
         }, []);
-    
-        React.useEffect(() => {
-            if (showDropdown) {
-                const triggerBtn = document.getElementById('dropdown-trigger');
-                if (!triggerBtn) return;
-    
-                const rect = triggerBtn.getBoundingClientRect();
-    
-                const menu = document.createElement('ul');
-                menu.className = 'dropdown-menu';
-                Object.assign(menu.style, dropdownMenuStyle, {
-                    top: `${rect.bottom + 5}px`,
-                    left: `${rect.right - 180}px`,
-                    position: 'absolute'
-                });                
-    
-                menu.innerHTML = `
-                    <li style="padding: 0;">
-                        <a href="/profile" style="${styleToString(dropdownLinkStyle)}">Profile</a>
-                    </li>
-                    <li style="padding: 0;">
-                        <button style="${styleToString(dropdownLinkStyle)}" id="logout-btn">Log Out</button>
-                    </li>
-                `;
-    
-                document.body.appendChild(menu);
-                dropdownRef.current = menu;
-    
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    if (helpersLoaded) {
-                        logout();
-                        setIsLoggedIn(false);
-                        setCurrentUser(null);
-                        window.location.href = '/';;
-                    }
-                });
-            } else {
-                if (dropdownRef.current) {
-                    dropdownRef.current.remove();
-                    dropdownRef.current = null;
-                }
+
+        const handleLogout = () => {
+            if (helpersLoaded) {
+                logout();
+                setIsLoggedIn(false);
+                setCurrentUser(null);
+                window.location.reload();
             }
-        });
+        };
 
         const toggleDropdown = () => setShowDropdown(!showDropdown);
 

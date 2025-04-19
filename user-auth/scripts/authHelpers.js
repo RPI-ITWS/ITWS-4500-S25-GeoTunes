@@ -63,3 +63,9 @@ export function resetInactivityTimer() {
         }
     });
 });
+
+export function redirectIfAuthenticated() {
+    if (isAuthenticated()) {
+        window.location.href = '/city-exploration';
+    }
+}
