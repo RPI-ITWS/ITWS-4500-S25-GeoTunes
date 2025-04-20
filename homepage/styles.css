@@ -5,7 +5,7 @@
 }
 
 /* Explicitly override any font settings from global.css */
-body, button, input, textarea, select {
+body, button, input, textarea, select, h1, h2, h3, p {
     font-family: 'Montserrat', sans-serif !important;
 }
 
@@ -19,10 +19,11 @@ body, button, input, textarea, select {
 }
 
 .main-title {
-    font-family: 'Oleo Script', cursive;
+    font-family: 'Montserrat', sans-serif !important;
     font-size: 2.8rem;
     margin-bottom: 20px;
     color: var(--navy-blue);
+    font-weight: bold;
 }
 
 .main-subtitle {
@@ -55,10 +56,11 @@ body, button, input, textarea, select {
 }
 
 .feature-title {
-    font-family: 'Oleo Script', cursive;
+    font-family: 'Montserrat', sans-serif !important;
     color: var(--navy-blue);
     font-size: 1.3rem;
     margin-bottom: 10px;
+    font-weight: bold;
 }
 
 .feature-desc {
@@ -66,16 +68,6 @@ body, button, input, textarea, select {
     color: var(--primary-text);
     font-size: 0.9rem;
     line-height: 1.4;
-}
-
-.map-container {
-    width: 100%;
-    max-width: 700px;
-    height: 250px;
-    margin: 30px auto;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .button-container {

@@ -22,16 +22,6 @@ function MainContent() {
       )
     ),
 
-    React.createElement('div', { className: 'map-container' },
-      React.createElement('div', { 
-        style: { 
-          backgroundColor: '#e0e0e0',
-          height: '100%',
-          width: '100%'
-        }
-      })
-    ),
-
     React.createElement('div', { className: 'feature-section' },
       createFeatureBox(
         'City Exploration', 
