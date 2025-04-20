@@ -575,6 +575,46 @@ app.delete('/api/user/events/:id', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/api/feed', async (req, res) => {
+    try {
+      const { city } = req.query;
+      const db = client.db('geotunes');
+      const posts = await db.collection('posts')
+        .find({ city })
+        .sort({ timestamp: -1 })
+        .toArray();
+      res.json(posts);
+    } catch (error) {
+      console.error('Failed to fetch feed:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  app.post('/api/feed', async (req, res) => {
+    try {
+      const { city, content, username } = req.body;
+  
+      const db = client.db('geotunes');
+      await db.collection('posts').insertOne({
+        city,
+        content,
+        username: username || 'Anonymous',
+        timestamp: new Date()
+      });
+  
+      res.status(201).json({ message: 'Post created' });
+    } catch (error) {
+      console.error('Failed to post to feed:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+    
+app.use('/feed', express.static(path.join(__dirname, 'socialFeed')));
+
+app.get('/feed', (req, res) => {
+  res.sendFile(path.join(__dirname, 'socialFeed', 'social.html'));
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
 });
