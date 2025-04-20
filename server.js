@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -152,6 +153,14 @@ app.use('/profile', express.static(path.join(__dirname, 'profile')));
 
 app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'profile', 'profile.html'));
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: {
+        errors: { general: 'Too many attempts, please try again later.' }
+    }
 });
 
 app.get('/login', (req, res) => {
@@ -315,41 +324,41 @@ app.get('/callback', async (req, res) => {
   }
 });
 
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const errors = {};
-
-    if (!email) errors.email = 'Email is required';
-    if (!password) errors.password = 'Password is required';
-    if (Object.keys(errors).length > 0) {
-      return res.status(400).json({ errors });
+app.post('/api/auth/login', authLimiter, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const errors = {};
+        
+        if (!email) errors.email = 'Email is required';
+        if (!password) errors.password = 'Password is required';
+        if (Object.keys(errors).length > 0) {
+        return res.status(400).json({ errors });
+        }
+        
+        const db = client.db("geotunes");
+        const usersCollection = db.collection("users");
+        const user = await usersCollection.findOne({ email });
+        console.log(user);
+        if (!user) {
+        return res.status(400).json({ errors: { general: 'Invalid email or password' } });
+        }
+        
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+        return res.status(400).json({ errors: { general: 'Invalid email or password' } });
+        }
+        
+        const token = jwt.sign(
+        { id: user._id.toString(), name: user.name, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+        );
+        
+        res.json({ token, user: { id: user._id.toString(), name: user.name, email: user.email } });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ errors: { general: 'Server error during login' } });
     }
-
-    const db = client.db("geotunes");
-    const usersCollection = db.collection("users");
-    const user = await usersCollection.findOne({ email });
-    console.log(user);
-    if (!user) {
-      return res.status(400).json({ errors: { general: 'Invalid email or password' } });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(400).json({ errors: { general: 'Invalid email or password' } });
-    }
-
-    const token = jwt.sign(
-      { id: user._id.toString(), name: user.name, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.json({ token, user: { id: user._id.toString(), name: user.name, email: user.email } });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ errors: { general: 'Server error during login' } });
-  }
 });
 
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
