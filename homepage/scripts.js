@@ -1,9 +1,6 @@
 'use strict';
 
 function MainContent() {
-  // Simple placeholder map image
-  const mapBgColor = '#e0e0e0';
-
   return React.createElement(
     'div',
     { className: 'main-content' },
@@ -27,12 +24,12 @@ function MainContent() {
 
     React.createElement('div', { className: 'map-container' },
       React.createElement('div', { 
-        className: 'map-image',
-        style: { backgroundColor: mapBgColor }
-      }),
-      React.createElement('div', { className: 'gradient-bg' },
-        React.createElement('span', { className: 'map-text' }, 'Explore Music By Location')
-      )
+        style: { 
+          backgroundColor: '#e0e0e0',
+          height: '100%',
+          width: '100%'
+        }
+      })
     ),
 
     React.createElement('div', { className: 'feature-section' },
