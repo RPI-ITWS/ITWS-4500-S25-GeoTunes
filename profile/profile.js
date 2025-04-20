@@ -4,7 +4,7 @@ import api from '/user-auth/scripts/api.js';
 api.setToken(localStorage.getItem('authToken'));
 
 if (!requireAuth()) {
-    throw new Error("Unauthorized");
+    window.location.href = '/login';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await api.delete('/api/user/profile');
             alert('Account deleted.');
             logout();
+            window.location.href = '/';
         } catch (err) {
             console.error(err);
             alert('Failed to delete account.');
