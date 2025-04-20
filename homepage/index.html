@@ -11,6 +11,10 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
+    <script type="module">
+        import { redirectIfAuthenticated } from '/user-auth/scripts/authHelpers.js';
+        redirectIfAuthenticated();
+    </script>    
     <div id="header-root"></div>
     <div id="root"></div>
     <div id="footer-root"></div>

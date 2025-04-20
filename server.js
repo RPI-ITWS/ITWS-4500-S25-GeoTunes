@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -137,6 +138,14 @@ app.get('/profile', (req, res) => {
     res.sendFile(path.join(__dirname, 'profile', 'profile.html'));
 });
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: {
+        errors: { general: 'Too many attempts, please try again later.' }
+    }
+});
+
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'user-auth', 'login.html'));
 });
@@ -147,7 +156,7 @@ app.get('/signup', (req, res) => {
 
 app.use('/user-auth/scripts', express.static(path.join(__dirname, 'user-auth', 'scripts')));
 
-app.post('/api/auth/signup', async (req, res) => {
+app.post('/api/auth/signup', authLimiter, async (req, res) => {
     try {
         const { name, email, password, confirmPassword } = req.body;
         const errors = {};
@@ -203,7 +212,7 @@ app.post('/api/auth/signup', async (req, res) => {
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         const errors = {};

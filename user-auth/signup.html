@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="/styles/components.css" />
 </head>
 <body>
+    <script type="module">
+        import { redirectIfAuthenticated } from '/user-auth/scripts/authHelpers.js';
+        redirectIfAuthenticated();
+    </script>
     <div id="header-root"></div>
     <main style="margin-top: 70px;">
         <div class="auth-container">
