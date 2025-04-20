@@ -184,7 +184,7 @@ app.post('/api/auth/signup', async (req, res) => {
         const token = jwt.sign(
         { id: result.insertedId.toString(), name, email },
         JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '1h' }
         );
         
         res.status(201).json({ 
@@ -217,7 +217,7 @@ app.post('/api/auth/login', async (req, res) => {
         const db = client.db("geotunes");
         const usersCollection = db.collection("users");
         const user = await usersCollection.findOne({ email });
-        console.log(user);
+        // console.log(user);
         if (!user) {
         return res.status(400).json({ errors: { general: 'Invalid email or password' } });
         }
@@ -404,7 +404,7 @@ app.delete('/locale/:locale', authenticateToken, async (req, res) => {
 app.get('/info', async (req, res) => {
     try {
         const city = req.query.city;
-        console.log(city)
+        // console.log(city)
         if (!city) {
             return res.status(400).json({ error: "City name is required" });
         }
