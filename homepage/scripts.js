@@ -3,7 +3,6 @@
 function MainContent() {
   // Simple placeholder map image
   const mapBgColor = '#e0e0e0';
-  const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
   return React.createElement(
     'div',
@@ -60,12 +59,11 @@ function MainContent() {
   }
 }
 
-const rootNode = document.getElementById('root');
-const root = ReactDOM.createRoot(rootNode);
-root.render(
+ReactDOM.render(
   React.createElement(
-    React.Fragment,
+    React.Fragment, 
     null,
     React.createElement(MainContent)
-  )
+  ),
+  document.getElementById('root')
 );
