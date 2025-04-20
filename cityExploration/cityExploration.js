@@ -381,7 +381,7 @@ function CityExplorationApp() {
             margin: "0 10px",
             textDecoration: "none"
             }
-        }, "Leave a Review")
+        }, "Add an Event")
         )
     );      
 }

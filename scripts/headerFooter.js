@@ -1,5 +1,5 @@
 function run() {
-    addGoogleFont();
+    // addGoogleFont();
     addStickyFooterStyles();
 
     if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
@@ -191,7 +191,9 @@ function run() {
         fontWeight: 'bold',
         textDecoration: 'none',
         transition: 'var(--transition-default)',
-        marginRight: '20px'
+        marginRight: '20px',
+        fontFamily:'Montserrat'
+
     };
 
     const dropdownButtonStyle = {
@@ -204,7 +206,7 @@ function run() {
         fontWeight: 'bold',
         textDecoration: 'none',
         transition: 'var(--transition-default)',
-        fontFamily: "'Oleo Script', cursive"
+        fontFamily: 'Montserrat'
     };    
 
     const dropdownMenuStyle = {
@@ -220,7 +222,7 @@ function run() {
         padding: 0,
         zIndex: 3000,
         minWidth: '180px',
-        fontFamily: "'Oleo Script', cursive",
+        fontFamily: 'Montserrat',
         overflow: 'hidden'
     };    
     
@@ -239,7 +241,7 @@ function run() {
         font: 'inherit',
         textAlign: 'left',
         transition: 'background 0.3s ease',
-        fontFamily: "'Oleo Script', cursive"
+        fontFamily: 'Montserrat'
     };    
 
     const footerStyle = {
@@ -295,14 +297,14 @@ function run() {
     }
 }
 
-function addGoogleFont() {
-    if (!document.querySelector('link[href*="googleapis.com/css?family=Oleo+Script"]')) {
-        const link = document.createElement('link');
-        link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-    }
-}
+// function addGoogleFont() {
+//     if (!document.querySelector('link[href*="googleapis.com/css?family=Oleo+Script"]')) {
+//         const link = document.createElement('link');
+//         link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
+//         link.rel = 'stylesheet';
+//         document.head.appendChild(link);
+//     }
+// }
 
 function addStickyFooterStyles() {
     if (!document.getElementById('sticky-footer-styles')) {

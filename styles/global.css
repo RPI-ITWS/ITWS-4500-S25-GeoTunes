@@ -14,10 +14,10 @@
 
 body {
     margin: 0;
-    font-family: var(--button-font);
+    font-family: 'Montserrat' !important;
     background-color: var(--primary-bg);
     color: var(--primary-text);
-    font-family: 'Oleo Script';
+    /* font-family: 'Oleo Script'; */
     min-height: 100vh;
 }
 
