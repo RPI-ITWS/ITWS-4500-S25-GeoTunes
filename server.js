@@ -219,6 +219,33 @@ app.post('/api/auth/signup', async (req, res) => {
         id: result.insertedId.toString(),
         name,
         email,
+<<<<<<< HEAD
+        password: hashedPassword,
+        spotify_id: req.body.spotify_id || "",
+        savedEvents: []
+        });
+        
+        const token = jwt.sign(
+        { id: result.insertedId.toString(), name, email },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+        );
+        
+        res.status(201).json({ 
+        token, 
+        user: { 
+            id: result.insertedId.toString(), 
+            name, 
+            email, 
+            spotify_id: req.body.spotify_id || "" 
+        } 
+        });
+        console.log("User inserted:", result.insertedId);
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ errors: { general: 'Server error during signup' } });
+    }
+=======
         spotify_id: req.body.spotify_id || ""
       }
     });
@@ -227,6 +254,7 @@ app.post('/api/auth/signup', async (req, res) => {
     console.error('Signup error:', error);
     res.status(500).json({ errors: { general: 'Server error during signup' } });
   }
+>>>>>>> main
 });
 
 const querystring = require('querystring');
@@ -338,7 +366,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
         const db = client.db("geotunes");
         const usersCollection = db.collection("users");
         const user = await usersCollection.findOne({ email });
-        console.log(user);
+        // console.log(user);
         if (!user) {
         return res.status(400).json({ errors: { general: 'Invalid email or password' } });
         }
@@ -530,11 +558,45 @@ app.delete('/locale/:locale', authenticateToken, async (req, res) => {
 
 // app.get('/node/info', async (req, res) => {
 app.get('/info', async (req, res) => {
+<<<<<<< HEAD
+    try {
+        const city = req.query.city;
+        // console.log(city)
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
+
+        const db = client.db("geotunes");
+        const collection = db.collection("location_entries");
+
+        const cityData = await collection.findOne(
+            {
+                cityName: { $regex: city.trim(), $options: 'i' }
+            },
+            {
+                projection: { cityName: 1, description: 1, _id: 0 }
+            }
+        );        
+        if (!cityData) {
+            console.log("No match for city:", city);
+            return res.status(404).json({ info: "No information available for this city." });
+        }
+
+        console.log("Found match:", cityData.cityName);
+        res.json({
+            info: `<strong>${cityData.cityName}</strong><br><br>${cityData.description}`
+        });
+
+    } catch (err) {
+        console.error("Error fetching city info:", err);
+        res.status(500).json({ info: "Server error while retrieving city info." });
+=======
   try {
     const city = req.query.city;
     console.log(city)
     if (!city) {
       return res.status(400).json({ error: "City name is required" });
+>>>>>>> main
     }
 
     const db = client.db("geotunes");
@@ -566,10 +628,30 @@ app.get('/info', async (req, res) => {
 
 // app.get('/node/events', async (req, res) => {
 app.get('/events', async (req, res) => {
+<<<<<<< HEAD
+    try {
+        const city = req.query.city;
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
+
+        const db = client.db("geotunes");
+        const eventsCollection = db.collection("events");
+
+        const events = await eventsCollection.find({
+            "location.city": { $regex: city.trim(), $options: 'i' }
+        }).toArray();
+
+        res.json({ events });
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ error: "Server error fetching events" });
+=======
   try {
     const city = req.query.city;
     if (!city) {
       return res.status(400).json({ error: "City name is required" });
+>>>>>>> main
     }
 
     const db = client.db("geotunes");

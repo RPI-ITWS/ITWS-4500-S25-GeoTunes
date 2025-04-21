@@ -15,7 +15,7 @@
     </script>
     <div id="header-root"></div>
     <main style="margin-top: 70px;">
-        <div class="auth-container">
+        <div class="auth-container" style="margin-bottom: 70px;">
         <div class="auth-form-wrapper">
             <h1>Create Account</h1>
             <div id="error-banner" role="alert" aria-live="assertive" class="error-banner" style="display:none;"></div>
@@ -31,10 +31,21 @@
                 <span class="error-message" id="error-email" aria-live="assertive"></span>
             </div>
             <div class="input-field">
+<<<<<<< HEAD
+                <label for="spotify_id">Spotify Username (optional)</label>
+                <input type="text" id="spotify_id" name="spotify_id" />
+                <span class="error-message" id="error-spotify_id" aria-live="assertive"></span>
+            </div>              
+            <div class="input-field">
+=======
+>>>>>>> main
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required />
+                <small style="color: #555; font-size: 0.9em; margin-top: 4px;">
+                    Must be at least 12 characters, include a capital letter, a symbol, and a number.
+                </small>
                 <span class="error-message" id="error-password" aria-live="assertive"></span>
-            </div>
+            </div>            
             <div class="input-field">
                 <label for="confirmPassword">Confirm Password</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required />

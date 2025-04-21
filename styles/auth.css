@@ -1,8 +1,8 @@
 .auth-container {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
 }
 
 .auth-form-wrapper {
@@ -20,4 +20,34 @@
     padding: 0.5rem;
     margin-bottom: 1rem;
     border-radius: 4px;
+}
+
+.login-main {
+    height: calc(100vh - 136px); /* subtract header and footer space*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.login-main .auth-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.login-page {
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .auth-form-wrapper {
+        width: 90%;
+        padding: 1rem;
+    }
+
+    .input-field input {
+        font-size: 1rem;
+    }
 }

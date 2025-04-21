@@ -1,5 +1,5 @@
 function run() {
-    addGoogleFont();
+    // addGoogleFont();
     addStickyFooterStyles();
 
     if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
@@ -25,36 +25,77 @@ function run() {
     };
 
     const GeoTunesHeader = () => {
-        const [isLoggedIn, setIsLoggedIn] = useState(false);
-        const [showDropdown, setShowDropdown] = useState(false);
-        const [currentUser, setCurrentUser] = useState(null);
-        const [helpersLoaded, setHelpersLoaded] = useState(false);
-
-        useEffect(() => {
+        const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+        const [showDropdown, setShowDropdown] = React.useState(false);
+        const [currentUser, setCurrentUser] = React.useState(null);
+        const [helpersLoaded, setHelpersLoaded] = React.useState(false);
+        const dropdownRef = React.useRef(null);
+    
+        React.useEffect(() => {
             importAuthHelpers().then(success => {
                 if (success) {
                     setHelpersLoaded(true);
                     const authenticated = isAuthenticated();
                     setIsLoggedIn(authenticated);
-
                     if (authenticated) {
                         setCurrentUser(getCurrentUser());
                     }
                 }
             });
         }, []);
-
-        const handleLogout = () => {
-            if (helpersLoaded) {
-                logout();
-                setIsLoggedIn(false);
-                setCurrentUser(null);
-                window.location.reload();
+    
+        React.useEffect(() => {
+            if (showDropdown) {
+                const triggerBtn = document.getElementById('dropdown-trigger');
+                if (!triggerBtn) return;
+    
+                const rect = triggerBtn.getBoundingClientRect();
+    
+                const menu = document.createElement('ul');
+                menu.className = 'dropdown-menu';
+                Object.assign(menu.style, dropdownMenuStyle, {
+                    top: `${rect.bottom + 5}px`,
+                    left: `${rect.right - 180}px`,  // Align right edge of menu with button
+                    position: 'absolute'
+                });                
+    
+                menu.innerHTML = `
+                    <li style="padding: 0;">
+                        <a href="/profile" style="${styleToString(dropdownLinkStyle)}">Profile</a>
+                    </li>
+                    <li style="padding: 0;">
+                        <button style="${styleToString(dropdownLinkStyle)}" id="logout-btn">Log Out</button>
+                    </li>
+                `;
+    
+                document.body.appendChild(menu);
+                dropdownRef.current = menu;
+    
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    if (helpersLoaded) {
+                        logout();
+                        setIsLoggedIn(false);
+                        setCurrentUser(null);
+                        window.location.reload();
+                    }
+                });
+            } else {
+                if (dropdownRef.current) {
+                    dropdownRef.current.remove();
+                    dropdownRef.current = null;
+                }
             }
-        };
-
-        const toggleDropdown = () => setShowDropdown(!showDropdown);
-
+    
+            return () => {
+                if (dropdownRef.current) {
+                    dropdownRef.current.remove();
+                    dropdownRef.current = null;
+                }
+            };
+        }, [showDropdown]);
+    
+        const toggleDropdown = () => setShowDropdown(prev => !prev);
+    
         return React.createElement('header', {
             className: 'geotunes-header',
             style: headerStyle
@@ -72,7 +113,13 @@ function run() {
                 React.createElement('a', { href: isLoggedIn ? '/city-exploration' : '/', style: titleLinkStyle }, 'GeoTunes')
             ),
             React.createElement('div', { className: 'auth-controls' },
-                isLoggedIn ? createDropdown() : createLoginButton()
+                isLoggedIn ? React.createElement('div', { style: { display: 'inline-block' } },
+                    React.createElement('button', {
+                        id: 'dropdown-trigger',
+                        onClick: toggleDropdown,
+                        style: dropdownButtonStyle
+                    }, `${currentUser ? currentUser.name : 'Account'} \u25BC`)
+                ) : createLoginButton()
             )
         );
 
@@ -117,6 +164,7 @@ function run() {
             );
         }
     };
+    
 
     const GeoTunesFooter = () => {
         return React.createElement('footer', {
@@ -145,6 +193,9 @@ function run() {
         borderBottom: '1px solid var(--border-color)',
         padding: '10px 20px',
         width: '100%',
+        boxSizing: 'border-box',
+        maxWidth: '100vw',
+        overflowX: 'hidden',
         position: 'fixed',
         top: 0,
         left: 0,
@@ -171,7 +222,9 @@ function run() {
         fontWeight: 'bold',
         textDecoration: 'none',
         transition: 'var(--transition-default)',
-        marginRight: '20px'
+        marginRight: '20px',
+        fontFamily:'Montserrat'
+
     };
 
     const dropdownButtonStyle = {
@@ -184,25 +237,25 @@ function run() {
         fontWeight: 'bold',
         textDecoration: 'none',
         transition: 'var(--transition-default)',
-        fontFamily: "'Oleo Script', cursive"
+        fontFamily: 'Montserrat'
     };    
 
     const dropdownMenuStyle = {
         position: 'absolute',
-        top: '100%',
+        top: 'calc(100% + 5px)',
         right: 0,
         backgroundColor: '#1A365D',
         border: '1px solid var(--border-color)',
         borderRadius: '6px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         listStyle: 'none',
-        margin: '8px 0 0 0',
+        margin: 0,
         padding: 0,
-        zIndex: 1000,
+        zIndex: 3000,
         minWidth: '180px',
-        fontFamily: "'Oleo Script', cursive",
+        fontFamily: 'Montserrat',
         overflow: 'hidden'
-    };
+    };    
     
     const dropdownItemStyle = {
         padding: 0,
@@ -219,7 +272,7 @@ function run() {
         font: 'inherit',
         textAlign: 'left',
         transition: 'background 0.3s ease',
-        fontFamily: "'Oleo Script', cursive"
+        fontFamily: 'Montserrat'
     };    
 
     const footerStyle = {
@@ -230,6 +283,9 @@ function run() {
         fontSize: '0.9em',
         color: 'var(--primary-bg)',
         width: '100%',
+        boxSizing: 'border-box',
+        maxWidth: '100vw',
+        overflowX: 'hidden',
         position: 'relative'
     };
 
@@ -272,14 +328,14 @@ function run() {
     }
 }
 
-function addGoogleFont() {
-    if (!document.querySelector('link[href*="googleapis.com/css?family=Oleo+Script"]')) {
-        const link = document.createElement('link');
-        link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-    }
-}
+// function addGoogleFont() {
+//     if (!document.querySelector('link[href*="googleapis.com/css?family=Oleo+Script"]')) {
+//         const link = document.createElement('link');
+//         link.href = 'https://fonts.googleapis.com/css?family=Oleo+Script';
+//         link.rel = 'stylesheet';
+//         document.head.appendChild(link);
+//     }
+// }
 
 function addStickyFooterStyles() {
     if (!document.getElementById('sticky-footer-styles')) {
@@ -313,4 +369,10 @@ function addStickyFooterStyles() {
 if (!window.headerFooterInitialized) {
     window.headerFooterInitialized = true;
     run();
+}
+
+function styleToString(styleObj) {
+    return Object.entries(styleObj)
+        .map(([key, value]) => `${key.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}:${value}`)
+        .join(';');
 }
