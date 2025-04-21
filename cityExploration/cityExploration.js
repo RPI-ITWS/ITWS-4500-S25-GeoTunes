@@ -117,56 +117,60 @@ function CityExplorationApp() {
           setTabContent(`<h4>Spotify Playlist for ${formatCity(cityName)}</h4><div id='embed-iframe'></div>`);
           window.onSpotifyIframeApiReady = (IFrameAPI) => {
             const element = document.getElementById('embed-iframe');
-            const options = {
-              uri: `${data.external_urls.spotify}`,
-            };
+            const options = { uri: `${data.external_urls.spotify}` };
             IFrameAPI.createController(element, options, () => {});
           };
         })
-        .catch((err) => {
-          console.error(err);
-          setTabContent('Error loading Spotify playlist.');
-        });
+        .catch(() => setTabContent('Error loading Spotify playlist.'));
     } else if (tab === 'info') {
       fetch(`/info?city=${encodeURIComponent(cityName)}`)
         .then((response) => response.json())
         .then((data) => {
           setTabContent(`<div>${data.info || 'No information available.'}</div>`);
         })
-        .catch((err) => {
-          console.error(err);
-          setTabContent('Error loading information.');
-        });
+        .catch(() => setTabContent('Error loading information.'));
     } else if (tab === 'events') {
       fetch(`/events?city=${encodeURIComponent(cityName)}`)
         .then((response) => response.json())
         .then((data) => {
-          if (!data.events || data.events.length === 0) {
-            setTabContent(`<h4>Events in ${formatCity(cityName)}</h4><p>No events available.</p>`);
-            return;
-          }
+          const eventsHtml = data.events?.length
+            ? data.events
+                .map(
+                  (event) => `
+                  <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                    <strong>${event.name}</strong><br>
+                    <em>${event.date} at ${event.time}</em><br>
+                    Location: ${event.location.address}<br>
+                    Cost: ${event.cost}<br>
+                    Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
+                    <p style="margin-top: 5px;">${event.description}</p>
+                  </li>`
+                )
+                .join('')
+            : `<p>No events available.</p>`;
 
-          let html = `<h4>Events in ${formatCity(cityName)}</h4><ul style="list-style: none; padding: 0;">`;
-
-          data.events.forEach((event) => {
-            html += `
-              <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-                <strong>${event.name}</strong><br>
-                <em>${event.date} at ${event.time}</em><br>
-                Location: ${event.location.address}<br>
-                Cost: ${event.cost}<br>
-                Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
-                <p style="margin-top: 5px;">${event.description}</p>
-              </li>`;
-          });
-
-          html += '</ul>';
-          setTabContent(html);
+          setTabContent(`
+            <h4>Events in ${formatCity(cityName)}</h4>
+            <ul style="list-style: none; padding: 0;">${eventsHtml}</ul>
+            <div style="margin-top: 30px; text-align: center;">
+              <a href="/create-event" style="
+                display: inline-block;
+                padding: 12px 24px;
+                background-color: #FF6B6B;
+                color: white;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: bold;
+                font-family: 'Oleo Script', cursive;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                transition: background 0.3s ease;
+              ">
+                Create New Event
+              </a>
+            </div>
+          `);
         })
-        .catch((err) => {
-          console.error(err);
-          setTabContent('Error loading events.');
-        });
+        .catch(() => setTabContent('Error loading events.'));
     }
   }
 
