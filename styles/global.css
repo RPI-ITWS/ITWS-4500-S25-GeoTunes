@@ -14,10 +14,10 @@
 
 body {
     margin: 0;
-    font-family: var(--button-font);
+    font-family: 'Montserrat' !important;
     background-color: var(--primary-bg);
     color: var(--primary-text);
-    font-family: 'Oleo Script';
+    /* font-family: 'Oleo Script'; */
     min-height: 100vh;
 }
 
@@ -26,6 +26,8 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #root {
@@ -38,4 +40,21 @@ html, body {
 button a {
     text-decoration: none; 
     color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .city-content-container {
+        flex-direction: column;
+    }
+
+    .map-section,
+    .right-panel {
+        width: 100%;
+        margin: 0 0 20px 0;
+        height: 300px;
+    }
+
+    .tabs button {
+        font-size: 0.9rem;
+    }
 }

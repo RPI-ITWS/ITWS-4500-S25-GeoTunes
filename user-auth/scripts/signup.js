@@ -1,6 +1,6 @@
 import api from './api.js';
 import { validateSignup } from './validation.js';
-import { handleSuccessfulAuth } from './authHelpers.js';
+import { handleSuccessfulAuth, handleSuccessfulAuthSignup } from './authHelpers.js';
 
 document.addEventListener('DOMContentLoaded', () => {
 const form = document.getElementById('signup-form');
@@ -21,7 +21,6 @@ form.addEventListener('submit', async (e) => {
         email: form.email.value.trim(),
         password: form.password.value.trim(),
         confirmPassword: form.confirmPassword.value.trim(),
-        spotify_id: form.spotify_id?.value.trim() || ""
     };            
 
     const errors = validateSignup(formData);
@@ -49,7 +48,7 @@ form.addEventListener('submit', async (e) => {
     const userData = await api.post('/api/auth/signup', formData);
     console.log('Signup successful:', userData);
     
-    handleSuccessfulAuth(userData);
+    handleSuccessfulAuthSignup(userData);
     } catch (err) {
     console.error('Signup error:', err);
     const responseErrors = err.response?.data?.errors || { general: 'Signup failed' };

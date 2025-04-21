@@ -580,6 +580,7 @@ function CityExplorationApp() {
                   }, post.content)
                 )
               )
+        }, "Add an Event")
         )
       )
     )
