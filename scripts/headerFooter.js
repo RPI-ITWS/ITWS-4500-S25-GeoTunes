@@ -122,7 +122,38 @@ function run() {
                 ) : createLoginButton()
             )
         );
-    
+
+        function createDropdown() {
+            return React.createElement('div', {
+                className: 'user-dropdown',
+                style: { position: 'relative', display: 'inline-block' }
+            },
+                React.createElement('button', {
+                    onClick: toggleDropdown,
+                    style: dropdownButtonStyle
+                }, `${currentUser ? currentUser.name : 'Account'} \u25BC`),
+                showDropdown && React.createElement('ul', {
+                    className: 'dropdown-menu',
+                    style: dropdownMenuStyle
+                },
+                    createDropdownItem('/profile', 'Profile'),
+                    createDropdownItem('/about', 'About'),
+                    React.createElement('li', { style: dropdownItemStyle },
+                        React.createElement('button', {
+                            onClick: handleLogout,
+                            style: dropdownLinkStyle
+                        }, 'Log Out')
+                    )
+                )
+            );
+        }
+
+        function createDropdownItem(href, text) {
+            return React.createElement('li', { style: dropdownItemStyle },
+                React.createElement('a', { href: href, style: dropdownLinkStyle }, text)
+            );
+        }
+
         function createLoginButton() {
             return React.createElement('div', { style: { display: 'flex', gap: '10px' } },
                 React.createElement('button', {
