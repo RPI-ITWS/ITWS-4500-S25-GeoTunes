@@ -120,6 +120,12 @@ button:disabled {
     margin-left: 15px;
 }
 
+.input-field small {
+    color: #555;
+    font-size: 0.9em;
+    margin-top: 4px;
+}
+
 @media (max-width: 768px) {
     .playlist-item {
         flex-direction: column;

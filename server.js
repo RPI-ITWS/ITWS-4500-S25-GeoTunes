@@ -448,7 +448,7 @@ app.get('/events', async (req, res) => {
         const eventsCollection = db.collection("events");
 
         const events = await eventsCollection.find({
-            "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
+            "location.city": { $regex: city.trim(), $options: 'i' }
         }).toArray();
 
         res.json({ events });

@@ -34,8 +34,11 @@
             <div class="input-field">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required />
+                <small style="color: #555; font-size: 0.9em; margin-top: 4px;">
+                    Must be at least 12 characters, include a capital letter, a symbol, and a number.
+                </small>
                 <span class="error-message" id="error-password" aria-live="assertive"></span>
-            </div>
+            </div>            
             <div class="input-field">
                 <label for="confirmPassword">Confirm Password</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required />
