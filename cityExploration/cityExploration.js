@@ -513,6 +513,7 @@ function CityExplorationApp() {
             )
           )
         ),
+        // Posts display
         React.createElement(
           'div',
           {
@@ -525,13 +526,13 @@ function CityExplorationApp() {
             },
           },
           feedPosts.length === 0
-            ? React.createElement('p', {
-                style: {
+            ? React.createElement('p', { 
+                style: { 
                   textAlign: 'center',
-                  fontStyle: 'italic',
+                  fontStyle: 'italic', 
                   color: colors.bodyText,
-                  padding: '20px',
-                },
+                  padding: '20px'
+                } 
               }, 'No posts yet. Be the first to share!')
             : feedPosts.map((post) =>
                 React.createElement(
@@ -544,41 +545,42 @@ function CityExplorationApp() {
                       marginBottom: '10px',
                       borderRadius: '8px',
                       border: '1px solid #eee',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                     },
                   },
                   React.createElement(
                     'div',
-                    {
-                      style: {
-                        display: 'flex',
-                        justifyContent: 'space-between',
+                    { 
+                      style: { 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
                         marginBottom: '8px',
                         borderBottom: '1px solid #f0f0f0',
-                        paddingBottom: '5px',
-                      },
+                        paddingBottom: '5px'
+                      } 
                     },
-                    React.createElement('div', {
-                      style: {
-                        fontWeight: 'bold',
-                        color: colors.infoTab,
-                      },
+                    React.createElement('div', { 
+                      style: { 
+                        fontWeight: 'bold', 
+                        color: colors.infoTab 
+                      } 
                     }, post.username || 'Anonymous'),
-                    React.createElement('small', {
-                      style: {
-                        color: '#888',
-                      },
+                    React.createElement('small', { 
+                      style: { 
+                        color: '#888' 
+                      } 
                     }, new Date(post.timestamp).toLocaleString())
                   ),
-                  React.createElement('p', {
-                    style: {
+                  React.createElement('p', { 
+                    style: { 
                       margin: '5px 0 0 0',
                       lineHeight: '1.4',
-                      color: colors.bodyText,
-                    },
+                      color: colors.bodyText
+                    } 
                   }, post.content)
                 )
               )
+        }, "Add an Event")
         )
       )
     )

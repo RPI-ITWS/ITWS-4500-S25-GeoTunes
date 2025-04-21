@@ -204,7 +204,7 @@ app.post('/api/auth/signup', async (req, res) => {
       email,
       password: hashedPassword,
       spotify_id: req.body.spotify_id || "",
-      savedEvents: [],
+      savedEvents: []
     });
 
     const token = jwt.sign(
@@ -219,15 +219,42 @@ app.post('/api/auth/signup', async (req, res) => {
         id: result.insertedId.toString(),
         name,
         email,
+<<<<<<< HEAD
+        password: hashedPassword,
         spotify_id: req.body.spotify_id || "",
-      },
+        savedEvents: []
+        });
+        
+        const token = jwt.sign(
+        { id: result.insertedId.toString(), name, email },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+        );
+        
+        res.status(201).json({ 
+        token, 
+        user: { 
+            id: result.insertedId.toString(), 
+            name, 
+            email, 
+            spotify_id: req.body.spotify_id || "" 
+        } 
+        });
+        console.log("User inserted:", result.insertedId);
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ errors: { general: 'Server error during signup' } });
+    }
+=======
+        spotify_id: req.body.spotify_id || ""
+      }
     });
-
     console.log("User inserted:", result.insertedId);
   } catch (error) {
     console.error('Signup error:', error);
     res.status(500).json({ errors: { general: 'Server error during signup' } });
   }
+>>>>>>> main
 });
 
 const querystring = require('querystring');
@@ -417,16 +444,14 @@ app.post('/add-song', authenticateToken, async (req, res) => {
     if (!title || !artist) {
       return res.status(400).json({ error: "Title and artist are required" });
     }
-
     const db = client.db("geotunes");
     const collection = db.collection("songs");
     const result = await collection.insertOne({
       title,
       artist,
       userId: req.user.id,
-      createdAt: new Date(),
+      createdAt: new Date()
     });
-
     res.status(201).json({ message: "Song added successfully", id: result.insertedId });
   } catch (error) {
     console.error("Error adding song:", error);
@@ -456,11 +481,122 @@ app.get('/newkey', async (req, res) => {
   }
 });
 
+app.get('/locale/:locale', async (req, res) => {
+  try {
+    const { locale } = req.params;
+    const db = client.db("geotunes");
+    const collection = db.collection("locales");
+    const localeData = await collection.findOne({ name: locale });
+    if (localeData) {
+      res.json(localeData);
+    } else {
+      res.status(404).json({ error: "Locale not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching locale:", error);
+    res.status(500).json({ error: "Failed to fetch locale" });
+  }
+});
+
+app.use('/about', express.static(path.join(__dirname, 'about')));
+
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(__dirname, 'about', 'about.html'));
+});
+
+
+app.post('/locale/:locale', authenticateToken, async (req, res) => {
+  try {
+    const { locale } = req.params;
+    const db = client.db("geotunes");
+    const collection = db.collection("locales");
+    const result = await collection.insertOne({
+      name: locale,
+      userId: req.user.id,
+      ...req.body,
+      createdAt: new Date()
+    });
+    res.status(201).json({ message: "Locale created successfully", id: result.insertedId });
+  } catch (error) {
+    console.error("Error creating locale:", error);
+    res.status(500).json({ error: "Failed to create locale" });
+  }
+});
+
+app.put('/locale/:locale', authenticateToken, async (req, res) => {
+  try {
+    const { locale } = req.params;
+    const db = client.db("geotunes");
+    const collection = db.collection("locales");
+    const result = await collection.updateOne(
+      { name: locale },
+      { $set: { ...req.body, updatedAt: new Date() } },
+      { upsert: true }
+    );
+    res.json({ message: "Locale updated successfully", modifiedCount: result.modifiedCount });
+  } catch (error) {
+    console.error("Error updating locale:", error);
+    res.status(500).json({ error: "Failed to update locale" });
+  }
+});
+
+app.delete('/locale/:locale', authenticateToken, async (req, res) => {
+  try {
+    const { locale } = req.params;
+    const db = client.db("geotunes");
+    const collection = db.collection("locales");
+    const result = await collection.deleteOne({ name: locale });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Locale not found" });
+    }
+    res.json({ message: "Locale deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting locale:", error);
+    res.status(500).json({ error: "Failed to delete locale" });
+  }
+});
+
+// app.get('/node/info', async (req, res) => {
 app.get('/info', async (req, res) => {
+<<<<<<< HEAD
+    try {
+        const city = req.query.city;
+        // console.log(city)
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
+
+        const db = client.db("geotunes");
+        const collection = db.collection("location_entries");
+
+        const cityData = await collection.findOne(
+            {
+                cityName: { $regex: city.trim(), $options: 'i' }
+            },
+            {
+                projection: { cityName: 1, description: 1, _id: 0 }
+            }
+        );        
+        if (!cityData) {
+            console.log("No match for city:", city);
+            return res.status(404).json({ info: "No information available for this city." });
+        }
+
+        console.log("Found match:", cityData.cityName);
+        res.json({
+            info: `<strong>${cityData.cityName}</strong><br><br>${cityData.description}`
+        });
+
+    } catch (err) {
+        console.error("Error fetching city info:", err);
+        res.status(500).json({ info: "Server error while retrieving city info." });
+=======
   try {
     const city = req.query.city;
+    console.log(city)
     if (!city) {
       return res.status(400).json({ error: "City name is required" });
+>>>>>>> main
     }
 
     const db = client.db("geotunes");
@@ -468,38 +604,61 @@ app.get('/info', async (req, res) => {
 
     const cityData = await collection.findOne(
       {
-        cityName: { $regex: city.trim(), $options: 'i' },
+        cityName: { $regex: city.trim(), $options: 'i' }
       },
       {
-        projection: { cityName: 1, description: 1, _id: 0 },
+        projection: { cityName: 1, description: 1, _id: 0 }
       }
     );
-
     if (!cityData) {
+      console.log("No match for city:", city);
       return res.status(404).json({ info: "No information available for this city." });
     }
 
+    console.log("Found match:", cityData.cityName);
     res.json({
-      info: `<strong>${cityData.cityName}</strong><br><br>${cityData.description}`,
+      info: `<strong>${cityData.cityName}</strong><br><br>${cityData.description}`
     });
+
   } catch (err) {
     console.error("Error fetching city info:", err);
     res.status(500).json({ info: "Server error while retrieving city info." });
   }
 });
 
+// app.get('/node/events', async (req, res) => {
 app.get('/events', async (req, res) => {
+<<<<<<< HEAD
+    try {
+        const city = req.query.city;
+        if (!city) {
+            return res.status(400).json({ error: "City name is required" });
+        }
+
+        const db = client.db("geotunes");
+        const eventsCollection = db.collection("events");
+
+        const events = await eventsCollection.find({
+            "location.city": { $regex: city.trim(), $options: 'i' }
+        }).toArray();
+
+        res.json({ events });
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ error: "Server error fetching events" });
+=======
   try {
     const city = req.query.city;
     if (!city) {
       return res.status(400).json({ error: "City name is required" });
+>>>>>>> main
     }
 
     const db = client.db("geotunes");
     const eventsCollection = db.collection("events");
 
     const events = await eventsCollection.find({
-      "location.city": { $regex: city.trim(), $options: 'i' },
+      "location.city": { $regex: `^${city.trim()}$`, $options: 'i' }
     }).toArray();
 
     res.json({ events });
@@ -620,43 +779,38 @@ app.delete('/api/user/events/:id', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/feed', async (req, res) => {
-  try {
-    const { city } = req.query;
-    if (!city) {
-      return res.status(400).json({ error: "City name is required" });
+    try {
+      const { city } = req.query;
+      const db = client.db('geotunes');
+      const posts = await db.collection('posts')
+        .find({ city })
+        .sort({ timestamp: -1 })
+        .toArray();
+      res.json(posts);
+    } catch (error) {
+      console.error('Failed to fetch feed:', error);
+      res.status(500).json({ error: 'Server error' });
     }
-
-    const db = client.db('geotunes');
-    const posts = await db.collection('posts')
-      .find({ city: { $regex: city.trim(), $options: 'i' } })
-      .sort({ timestamp: -1 })
-      .toArray();
-
-    res.json(posts);
-  } catch (error) {
-    console.error('Failed to fetch feed:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+  });
   
-app.post('/api/feed', async (req, res) => {
-  try {
-    const { city, content, username } = req.body;
-
-    const db = client.db('geotunes');
-    await db.collection('posts').insertOne({
-      city,
-      content,
-      username: username || 'Anonymous',
-      timestamp: new Date()
-    });
-
-    res.status(201).json({ message: 'Post created' });
-  } catch (error) {
-    console.error('Failed to post to feed:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+  app.post('/api/feed', async (req, res) => {
+    try {
+      const { city, content, username } = req.body;
+  
+      const db = client.db('geotunes');
+      await db.collection('posts').insertOne({
+        city,
+        content,
+        username: username || 'Anonymous',
+        timestamp: new Date()
+      });
+  
+      res.status(201).json({ message: 'Post created' });
+    } catch (error) {
+      console.error('Failed to post to feed:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
 
 app.use('/create-event', express.static(path.join(__dirname, 'events')));
 app.get('/create-event', (req, res) => {
@@ -665,14 +819,14 @@ app.get('/create-event', (req, res) => {
 
 app.post('/api/create-event', async (req, res) => {
   try {
+    const db = client.db("geotunes");
+    const eventsCollection = db.collection("events");
+
     const { city, name, date, time, location, cost, contact, description } = req.body;
 
     if (!city || !name || !date || !time || !location || !contact) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
-    const db = client.db("geotunes");
-    const eventsCollection = db.collection("events");
 
     const result = await eventsCollection.insertOne({
       name,
@@ -681,12 +835,12 @@ app.post('/api/create-event', async (req, res) => {
       cost,
       contact,
       description,
-      user: "anonymous",
+      user: "anonymous", 
       location: {
         address: location,
-        city: city,
+        city: city
       },
-      createdAt: new Date(),
+      createdAt: new Date()
     });
 
     console.log("Event created:", result.insertedId);
