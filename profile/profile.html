@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="/styles/auth.css" />
 </head>
 <body>
+    <script>
+    if (!localStorage.getItem('authToken')) {
+        window.location.href = '/login';
+    }
+    </script>
     <div id="header-root"></div>
 
     <main style="margin-top: 70px;">
