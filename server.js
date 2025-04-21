@@ -778,6 +778,85 @@ app.delete('/api/user/events/:id', authenticateToken, async (req, res) => {
   }
 });
 
+app.get('/api/feed', async (req, res) => {
+    try {
+      const { city } = req.query;
+      const db = client.db('geotunes');
+      const posts = await db.collection('posts')
+        .find({ city })
+        .sort({ timestamp: -1 })
+        .toArray();
+      res.json(posts);
+    } catch (error) {
+      console.error('Failed to fetch feed:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+  app.post('/api/feed', async (req, res) => {
+    try {
+      const { city, content, username } = req.body;
+  
+      const db = client.db('geotunes');
+      await db.collection('posts').insertOne({
+        city,
+        content,
+        username: username || 'Anonymous',
+        timestamp: new Date()
+      });
+  
+      res.status(201).json({ message: 'Post created' });
+    } catch (error) {
+      console.error('Failed to post to feed:', error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+
+app.use('/create-event', express.static(path.join(__dirname, 'events')));
+app.get('/create-event', (req, res) => {
+  res.sendFile(path.join(__dirname, 'events', 'event.html'));
+});
+
+app.post('/api/create-event', async (req, res) => {
+  try {
+    const db = client.db("geotunes");
+    const eventsCollection = db.collection("events");
+
+    const { city, name, date, time, location, cost, contact, description } = req.body;
+
+    if (!city || !name || !date || !time || !location || !contact) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const result = await eventsCollection.insertOne({
+      name,
+      date,
+      time,
+      cost,
+      contact,
+      description,
+      user: "anonymous", 
+      location: {
+        address: location,
+        city: city
+      },
+      createdAt: new Date()
+    });
+
+    console.log("Event created:", result.insertedId);
+    res.status(201).json({ message: "Event created", id: result.insertedId });
+  } catch (error) {
+    console.error("Error creating event:", error);
+    res.status(500).json({ error: "Failed to create event" });
+  }
+});
+    
+app.use('/feed', express.static(path.join(__dirname, 'socialFeed')));
+
+app.get('/feed', (req, res) => {
+  res.sendFile(path.join(__dirname, 'socialFeed', 'social.html'));
+});
+
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
