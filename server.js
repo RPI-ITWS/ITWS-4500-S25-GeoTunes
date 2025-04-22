@@ -786,9 +786,9 @@ app.post('/api/feed', async (req, res) => {
   }
 });
 
-app.use('/create-event', express.static(path.join(__dirname, 'events')));
+app.use('/create-event', express.static(path.join(__dirname, 'createEvent')));
 app.get('/create-event', (req, res) => {
-  res.sendFile(path.join(__dirname, 'events', 'event.html'));
+  res.sendFile(path.join(__dirname, 'createEvent', 'createEvent.html'));
 });
 
 app.post('/api/create-event', async (req, res) => {
