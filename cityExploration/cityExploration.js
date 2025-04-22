@@ -6,13 +6,17 @@ if (!requireAuth()) {
 
 
 function CityExplorationApp() {
-  var _a = React.useState(""), city = _a[0], setCity = _a[1];
-  var _b = React.useState(""), currentCity = _b[0], setCurrentCity = _b[1];
-  var _c = React.useState("spotify"), activeTab = _c[0], setActiveTab = _c[1];
-  var _d = React.useState("Please search for a city first."), tabContent = _d[0], setTabContent = _d[1];
-  var _e = React.useState(false), mapInitialized = _e[0], setMapInitialized = _e[1];
-  var _f = React.useState(null), mapInstance = _f[0], setMapInstance = _f[1];
-  var _g = React.useState(null), marker = _g[0], setMarker = _g[1];
+    var _a = React.useState(""), city = _a[0], setCity = _a[1];
+    var _b = React.useState(""), currentCity = _b[0], setCurrentCity = _b[1];
+    var _c = React.useState("spotify"), activeTab = _c[0], setActiveTab = _c[1];
+    var _d = React.useState("Loading Spotify Playlist..."), tabContent = _d[0], setTabContent = _d[1];
+    var _e = React.useState(false), mapInitialized = _e[0], setMapInitialized = _e[1];
+    var _f = React.useState(null), mapInstance = _f[0], setMapInstance = _f[1];
+    var _g = React.useState(null), marker = _g[0], setMarker = _g[1];
+    const [feedPosts, setFeedPosts] = React.useState([]);
+    const [feedInput, setFeedInput] = React.useState('');
+    const [user, setUser] = React.useState(null);
+
 
   React.useEffect(function () {
     if (!mapInitialized) {
@@ -239,13 +243,38 @@ function CityExplorationApp() {
         updateMap(coords.lat, coords.lon);
         setActiveTab("spotify");
         loadTabContent("spotify", trimmedCity);
-      })
-      .catch(function (err) {
+        fetchFeed(trimmedCity);
+        })
+        .catch(function (err) {
         alert("Error: " + err.message);
       });
   }
 
-  function handleTabClick(tab) {
+    async function fetchFeed(cityName) {
+      const res = await fetch(`/api/feed?city=${encodeURIComponent(cityName)}`);
+      const data = await res.json();
+      setFeedPosts(data);
+  }
+  
+  async function postToFeed() {
+      const trimmed = feedInput.trim();
+      if (!trimmed) return;
+  
+      await fetch('/api/feed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              city: currentCity,
+              content: trimmed,
+              username: user?.name || 'Anonymous'
+          })
+      });
+  
+      setFeedInput('');
+      fetchFeed(currentCity);
+  }  
+
+    function handleTabClick(tab) {
     setActiveTab(tab);
     if (currentCity) {
       loadTabContent(tab, currentCity);
@@ -374,49 +403,69 @@ function CityExplorationApp() {
             "Events"
           )
         ),
-        React.createElement("div", {
-          className: "tab-content",
-          style: {
-            border: "1px solid #2A2A2A",
-            padding: "10px",
-            height: "100%",
-            overflowY: "auto",
-            borderRadius: "8px",
-            background: "#fdfdfd"
-          },
-          dangerouslySetInnerHTML: { __html: tabContent }
-        })
-      )
-    ),
-    React.createElement(
-      "div",
-      { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
-      React.createElement("a", {
-        href: "/add-song",
-        style: {
-          display: "inline-block",
-          padding: "0.75rem 1.5rem",
-          backgroundColor: "#1A365D",
-          color: "#fff",
-          borderRadius: "4px",
-          margin: "0 10px",
-          textDecoration: "none"
-        }
-      }, "Add to Playlist"),
-      React.createElement("a", {
-        href: "/reviews",
-        style: {
-          display: "inline-block",
-          padding: "0.75rem 1.5rem",
-          backgroundColor: "#1A365D",
-          color: "#fff",
-          borderRadius: "4px",
-          margin: "0 10px",
-          textDecoration: "none"
-        }
-      }, "Add an Event")
-    )
-  );
+        React.createElement(
+        "div",
+        { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
+        React.createElement("a", {
+            href: "/add-song",
+            style: {
+            display: "inline-block",
+            padding: "0.75rem 1.5rem",
+            backgroundColor: "#1A365D",
+            color: "#fff",
+            borderRadius: "4px",
+            margin: "0 10px",
+            textDecoration: "none"
+            }
+        }, "Add to Playlist"),
+        React.createElement("a", {
+            href: "/create-event",
+            style: {
+            display: "inline-block",
+            padding: "0.75rem 1.5rem",
+            backgroundColor: "#1A365D",
+            color: "#fff",
+            borderRadius: "4px",
+            margin: "0 10px",
+            textDecoration: "none"
+            }
+        }, "Add an Event")
+        ),
+        React.createElement(
+          "div",
+          { className: "social-feed", style: { marginTop: "30px" } },
+          React.createElement("h3", null, `${currentCity || 'City'} Feed`),
+          React.createElement("textarea", {
+              value: feedInput,
+              onChange: (e) => setFeedInput(e.target.value),
+              placeholder: `What's happening in ${currentCity || 'this city'}?`,
+              rows: 3,
+              style: { width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }
+          }),
+          React.createElement("button", {
+              onClick: postToFeed,
+              style: { marginTop: "10px", padding: "6px 12px", backgroundColor: "#FF6B6B", color: "white", border: "none", borderRadius: "4px" }
+          }, "Post"),
+          feedPosts.length === 0
+              ? React.createElement("p", null, "No posts yet. Be the first to share!")
+              : feedPosts.map(post =>
+                  React.createElement("div", {
+                      key: post._id,
+                      style: {
+                          marginTop: "15px",
+                          padding: "10px",
+                          border: "1px solid #eee",
+                          borderRadius: "6px",
+                          backgroundColor: "#fafafa"
+                      }
+                  },
+                      React.createElement("strong", null, post.username || "Anonymous"),
+                      React.createElement("small", { style: { display: "block", color: "#888" } }, new Date(post.timestamp).toLocaleString()),
+                      React.createElement("p", null, post.content)
+                  )
+              )
+      )      
+    );      
 }
 
 ReactDOM.render(
