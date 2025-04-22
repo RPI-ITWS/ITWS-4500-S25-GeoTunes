@@ -4,39 +4,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GeoTunes - Login</title>
+  <title>GeoTunes Create Playlist</title>
   <link rel="stylesheet" href="/styles/global.css" />
   <link rel="stylesheet" href="/styles/auth.css" />
   <link rel="stylesheet" href="/styles/components.css" />
 </head>
+
 <body class="login-page">
 
-<body>
-    <script type="module">
-        import { redirectIfAuthenticated } from '/user-auth/scripts/authHelpers.js';
-        redirectIfAuthenticated();
-    </script>    
+  <body>
     <div id="header-root"></div>
     <main class="login-main">
       <div class="auth-container">
         <div class="auth-form-wrapper">
-          <h1>Welcome Back</h1>
+          <h1>Create Playlist</h1>
           <div id="error-banner" role="alert" aria-live="assertive" class="error-banner" style="display:none;"></div>
           <form id="login-form">
             <div class="input-field">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" required />
-              <span class="error-message" id="error-email" aria-live="assertive"></span>
+              <label for="playlistName">Playlist Name</label>
+              <input type="playlist" id="playlist" name="playlist" required />
             </div>
             <div class="input-field">
-              <label for="password">Password</label>
-              <input type="password" id="password" name="password" required />
-              <span class="error-message" id="error-password" aria-live="assertive"></span>
+              <label for="Playlist Description">Playlist Description</label>
+              <input type="description" id="description" name="description" required />
             </div>
 
-            <button type="submit" id="login-button">LOG IN</button>
+            <button type="submit" id="login-button">Submit</button>
           </form>
-          <p>Don't have an account? <a href="/signup">Sign Up</a></p>
         </div>
       </div>
     </main>
@@ -46,7 +40,7 @@
     <script type="module" src="/user-auth/scripts/validation.js"></script>
     <script type="module" src="/user-auth/scripts/authHelpers.js"></script>
     <script type="module" src="/user-auth/scripts/login.js"></script>
-    <script type="module" src="/scripts/headerFooter.js"></script>
+    <script type="module" src="/playlist/scripts/create-playlist.js"></script>
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
   </body>
