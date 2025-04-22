@@ -4,7 +4,7 @@ function CityExplorationApp() {
   const [city, setCity] = React.useState('');
   const [currentCity, setCurrentCity] = React.useState('');
   const [activeTab, setActiveTab] = React.useState('spotify');
-  const [tabContent, setTabContent] = React.useState('Loading...');
+  const [tabContent, setTabContent] = React.useState('Please search for a city first.');
   const [mapInitialized, setMapInitialized] = React.useState(false);
   const [mapInstance, setMapInstance] = React.useState(null);
   const [marker, setMarker] = React.useState(null);
@@ -26,7 +26,7 @@ function CityExplorationApp() {
       const map = L.map('map', {
         zoomControl: false
       }).setView(defaultCoords, 13);
-      
+
       L.control.zoom({ position: 'bottomright' }).addTo(map);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
@@ -114,13 +114,46 @@ function CityExplorationApp() {
       fetch(`/spotify?city=${encodeURIComponent(cityName)}`)
         .then((response) => response.json())
         .then((data) => {
-          setTabContent(`<h4>Spotify Playlist for ${formatCity(cityName)}</h4><div id='embed-iframe'></div>`);
+          setTabContent(`
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+              <h4 style="margin: 0;">Spotify Playlists for ${formatCity(cityName)}</h4>
+              <a href="/create-playlist" style="
+                display: inline-block;
+                padding: 8px 16px;
+                background-color: #FF6B6B;
+                color: white;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: bold;
+                font-family: 'Oleo Script', cursive;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                transition: background 0.3s ease;
+                margin-top: 10px;
+              ">
+                Create New Event
+              </a>
+            </div>
+            <div id='embed-container' style="margin-top: 20px;"></div>
+          `);
           window.onSpotifyIframeApiReady = (IFrameAPI) => {
-            const element = document.getElementById('embed-iframe');
-            const options = { uri: `${data.external_urls.spotify}` };
-            IFrameAPI.createController(element, options, () => {});
+            const container = document.getElementById('embed-container');
+            data.forEach((playlist, index) => {
+              const div = document.createElement('div');
+              div.id = `embed-iframe-${index}`;
+              div.style.marginBottom = '20px';
+              container.appendChild(div);
+              const element = document.getElementById('embed-iframe');
+              const options = {
+                uri: `spotify:playlist:${playlist.playlist_id}`, width: '100%',
+                height: '80',
+                theme: 'black',
+                view: 'list'
+              };
+              IFrameAPI.createController(div, options, () => { });
+            });
           };
         })
+
         .catch(() => setTabContent('Error loading Spotify playlist.'));
     } else if (tab === 'info') {
       fetch(`/info?city=${encodeURIComponent(cityName)}`)
@@ -135,8 +168,8 @@ function CityExplorationApp() {
         .then((data) => {
           const eventsHtml = data.events?.length
             ? data.events
-                .map(
-                  (event) => `
+              .map(
+                (event) => `
                   <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
                     <strong>${event.name}</strong><br>
                     <em>${event.date} at ${event.time}</em><br>
@@ -145,8 +178,8 @@ function CityExplorationApp() {
                     Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
                     <p style="margin-top: 5px;">${event.description}</p>
                   </li>`
-                )
-                .join('')
+              )
+              .join('')
             : `<p>No events available.</p>`;
 
           setTabContent(`
@@ -242,41 +275,41 @@ function CityExplorationApp() {
 
   return React.createElement(
     'div',
-    { 
-      className: 'container', 
-      style: { 
-        width: '90%', 
+    {
+      className: 'container',
+      style: {
+        width: '90%',
         maxWidth: '1200px',
         margin: '0 auto',
         fontFamily: 'Arial, sans-serif',
         backgroundColor: colors.pageBg,
         padding: '20px',
         borderRadius: '8px'
-      } 
+      }
     },
     React.createElement(
       'h2',
-      { 
-        style: { 
-          textAlign: 'center', 
+      {
+        style: {
+          textAlign: 'center',
           color: colors.headingText,
           marginBottom: '20px',
           fontFamily: "'Oleo Script', cursive"
-        } 
+        }
       },
       'GeoTunes City Exploration'
     ),
     React.createElement(
       'div',
-      { 
-        className: 'search-bar', 
-        style: { 
-          textAlign: 'center', 
+      {
+        className: 'search-bar',
+        style: {
+          textAlign: 'center',
           margin: '20px 0',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
-        } 
+        }
       },
       React.createElement('input', {
         type: 'text',
@@ -337,33 +370,33 @@ function CityExplorationApp() {
         // Map section
         React.createElement(
           'div',
-          { 
-            className: 'map-section', 
-            style: { 
+          {
+            className: 'map-section',
+            style: {
               flex: '1 1 400px',
               minHeight: '400px',
               borderRadius: '12px',
               overflow: 'hidden',
               boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
               border: '1px solid #ccc'
-            } 
+            }
           },
           React.createElement('div', {
             id: 'map',
             style: {
-                height: '100%',
-                minHeight: '400px',
-                width: '100%',
-              },
-              
+              height: '100%',
+              minHeight: '400px',
+              width: '100%',
+            },
+
           })
         ),
         // Content tabs section - styling matched to your image
         React.createElement(
           'div',
-          { 
-            className: 'content-section', 
-            style: { 
+          {
+            className: 'content-section',
+            style: {
               flex: '1 1 400px',
               display: 'flex',
               flexDirection: 'column',
@@ -371,19 +404,19 @@ function CityExplorationApp() {
               overflow: 'hidden',
               boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
               border: '1px solid #ccc',
-            } 
+            }
           },
           // Tabs - styling to match your image exactly
           React.createElement(
             'div',
-            { 
-              className: 'tabs', 
-              style: { 
+            {
+              className: 'tabs',
+              style: {
                 display: 'flex',
                 overflow: 'hidden',
                 borderTopLeftRadius: '12px',
                 borderTopRightRadius: '12px',
-              } 
+              }
             },
             [
               { name: 'spotify', color: colors.spotifyTab, text: 'Spotify' },
@@ -432,16 +465,16 @@ function CityExplorationApp() {
       // Feed section - now below map and tabs
       React.createElement(
         'div',
-        { 
-          className: 'social-feed-section', 
-          style: { 
+        {
+          className: 'social-feed-section',
+          style: {
             borderRadius: '12px',
             boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
             border: '1px solid #ccc',
             padding: '20px',
             backgroundColor: colors.feedBg,
             marginTop: '10px'
-          } 
+          }
         },
         React.createElement(
           'div',
@@ -455,18 +488,18 @@ function CityExplorationApp() {
               paddingBottom: '8px'
             }
           },
-          React.createElement('h3', { 
-            style: { 
+          React.createElement('h3', {
+            style: {
               color: colors.spotifyTab,
               margin: 0,
               fontFamily: "'Oleo Script', cursive",
-            } 
+            }
           }, `${formatCity(currentCity) || 'City'} Feed`),
-          React.createElement('small', { 
-            style: { 
+          React.createElement('small', {
+            style: {
               color: colors.bodyText,
               fontStyle: 'italic'
-            } 
+            }
           }, 'Share your experiences')
         ),
         // Post input area
@@ -526,59 +559,59 @@ function CityExplorationApp() {
           },
           feedPosts.length === 0
             ? React.createElement('p', {
-                style: {
-                  textAlign: 'center',
-                  fontStyle: 'italic',
-                  color: colors.bodyText,
-                  padding: '20px',
-                },
-              }, 'No posts yet. Be the first to share!')
+              style: {
+                textAlign: 'center',
+                fontStyle: 'italic',
+                color: colors.bodyText,
+                padding: '20px',
+              },
+            }, 'No posts yet. Be the first to share!')
             : feedPosts.map((post) =>
+              React.createElement(
+                'div',
+                {
+                  key: post._id,
+                  style: {
+                    background: colors.contentBg,
+                    padding: '15px',
+                    marginBottom: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #eee',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  },
+                },
                 React.createElement(
                   'div',
                   {
-                    key: post._id,
                     style: {
-                      background: colors.contentBg,
-                      padding: '15px',
-                      marginBottom: '10px',
-                      borderRadius: '8px',
-                      border: '1px solid #eee',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '8px',
+                      borderBottom: '1px solid #f0f0f0',
+                      paddingBottom: '5px',
                     },
                   },
-                  React.createElement(
-                    'div',
-                    {
-                      style: {
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '8px',
-                        borderBottom: '1px solid #f0f0f0',
-                        paddingBottom: '5px',
-                      },
-                    },
-                    React.createElement('div', {
-                      style: {
-                        fontWeight: 'bold',
-                        color: colors.infoTab,
-                      },
-                    }, post.username || 'Anonymous'),
-                    React.createElement('small', {
-                      style: {
-                        color: '#888',
-                      },
-                    }, new Date(post.timestamp).toLocaleString())
-                  ),
-                  React.createElement('p', {
+                  React.createElement('div', {
                     style: {
-                      margin: '5px 0 0 0',
-                      lineHeight: '1.4',
-                      color: colors.bodyText,
+                      fontWeight: 'bold',
+                      color: colors.infoTab,
                     },
-                  }, post.content)
-                )
+                  }, post.username || 'Anonymous'),
+                  React.createElement('small', {
+                    style: {
+                      color: '#888',
+                    },
+                  }, new Date(post.timestamp).toLocaleString())
+                ),
+                React.createElement('p', {
+                  style: {
+                    margin: '5px 0 0 0',
+                    lineHeight: '1.4',
+                    color: colors.bodyText,
+                  },
+                }, post.content)
               )
+            )
         )
       )
     )
