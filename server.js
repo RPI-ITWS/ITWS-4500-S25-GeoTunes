@@ -98,11 +98,12 @@ async function getKey() {
 async function newKey() {
   let key = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
-    body: "grant_type=client_credentials&client_id=b931d26ffacd40e1bb2a85ff3b82df0e&client_secret=1841d9b707d445d0b4ca9821981c0cc8",
+    body: `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
+
   key = await key.json();
   const db = client.db("geotunes");
   const collection = db.collection('api_data');
@@ -110,6 +111,44 @@ async function newKey() {
   await collection.insertOne({ "key": key.access_token, "created_at": new Date() });
   console.log("New key generated:", key.access_token);
   return key.access_token;
+}
+
+async function newUserKey(refreshToken) {
+  const url = "https://accounts.spotify.com/api/token";
+  const payload = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET
+    }),
+  }
+  const body = await fetch(url, payload);
+  const response = await body.json();
+
+  const db = client.db("geotunes");
+  const collection = db.collection("users");
+  const user = await collection.findOne({ spotify_refresh: refreshToken });
+  if (user) {
+    if (response.refresh_token) {
+      await collection.updateOne(
+        { _id: user._id },
+        { $set: { spotify_access: response.access_token, spotify_refresh: response.refresh_token } }
+      );
+    }
+    else {
+      await collection.updateOne(
+        { _id: user._id },
+        { $set: { spotify_access: response.access_token } }
+      );
+    }
+  }
+
+  return response.access_token;
 }
 
 async function playlistRequest(id) {
@@ -155,12 +194,19 @@ app.get('/profile', (req, res) => {
   res.sendFile(path.join(__dirname, 'profile', 'profile.html'));
 });
 
+app.use('/playlist', express.static(path.join(__dirname, 'playlist')));
+
+app.get('/create-playlist', (req, res) => {
+  console.log("Serving file from:", path.join(__dirname, 'playlist', 'create-playlist.html'));
+  res.sendFile(path.join(__dirname, 'playlist', 'create-playlist.html'));
+})
+
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: {
-        errors: { general: 'Too many attempts, please try again later.' }
-    }
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    errors: { general: 'Too many attempts, please try again later.' }
+  }
 });
 
 app.get('/login', (req, res) => {
@@ -204,6 +250,8 @@ app.post('/api/auth/signup', async (req, res) => {
       email,
       password: hashedPassword,
       spotify_id: req.body.spotify_id || "",
+      spotify_access: "",
+      spotify_refresh: "",
       savedEvents: [],
     });
 
@@ -234,7 +282,7 @@ const querystring = require('querystring');
 
 app.get('/api/auth/spotify', (req, res) => {
   const state = generateRandomString(16);
-  const scope = 'user-read-private user-read-email';
+  const scope = 'user-read-private user-read-email playlist-modify-public playlist-modify-private';
 
   const redirectUrl = 'https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -278,6 +326,7 @@ app.get('/callback', async (req, res) => {
     }
 
     const access_token = tokenData.access_token;
+    const refresh_token = tokenData.refresh_token;
 
     // Step 2: Use access token to get user's Spotify profile
     const profileResponse = await fetch('https://api.spotify.com/v1/me', {
@@ -287,6 +336,22 @@ app.get('/callback', async (req, res) => {
     });
 
     const profileData = await profileResponse.json();
+    if (profileData?.error?.message === "The access token expired") {
+      const key = await newKey();
+      const response = await fetch(`https://api.spotify.com/v1/users/${spotifyId}/playlists`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: playlist.name,
+          description: playlist.description,
+          public: true
+        })
+      });
+      const data = await response.json();
+    }
 
     // Step 3: Do something with Spotify profile (e.g. save to DB)
     const spotifyId = profileData.id;
@@ -302,7 +367,7 @@ app.get('/callback', async (req, res) => {
       // Update existing user with Spotify ID
       await usersCollection.updateOne(
         { _id: user._id },
-        { $set: { spotify_id: spotifyId } }
+        { $set: { spotify_id: spotifyId, spotify_access: access_token, spotify_refresh: refresh_token } }
       );
       console.log(`✅ Updated Spotify ID for user ${email}`);
     } else {
@@ -326,40 +391,40 @@ app.get('/callback', async (req, res) => {
 });
 
 app.post('/api/auth/login', authLimiter, async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const errors = {};
-        
-        if (!email) errors.email = 'Email is required';
-        if (!password) errors.password = 'Password is required';
-        if (Object.keys(errors).length > 0) {
-        return res.status(400).json({ errors });
-        }
-        
-        const db = client.db("geotunes");
-        const usersCollection = db.collection("users");
-        const user = await usersCollection.findOne({ email });
-        // console.log(user);
-        if (!user) {
-        return res.status(400).json({ errors: { general: 'Invalid email or password' } });
-        }
-        
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-        return res.status(400).json({ errors: { general: 'Invalid email or password' } });
-        }
-        
-        const token = jwt.sign(
-        { id: user._id.toString(), name: user.name, email: user.email },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-        );
-        
-        res.json({ token, user: { id: user._id.toString(), name: user.name, email: user.email } });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ errors: { general: 'Server error during login' } });
+  try {
+    const { email, password } = req.body;
+    const errors = {};
+
+    if (!email) errors.email = 'Email is required';
+    if (!password) errors.password = 'Password is required';
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ errors });
     }
+
+    const db = client.db("geotunes");
+    const usersCollection = db.collection("users");
+    const user = await usersCollection.findOne({ email });
+    // console.log(user);
+    if (!user) {
+      return res.status(400).json({ errors: { general: 'Invalid email or password' } });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(400).json({ errors: { general: 'Invalid email or password' } });
+    }
+
+    const token = jwt.sign(
+      { id: user._id.toString(), name: user.name, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({ token, user: { id: user._id.toString(), name: user.name, email: user.email } });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ errors: { general: 'Server error during login' } });
+  }
 });
 
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
@@ -406,6 +471,69 @@ app.get('/playlist/', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch playlist" });
   }
 });
+
+app.post('/playlist/create', async (req, res) => {
+  const { email, playlist } = req.body;
+
+  try {
+    const db = client.db('geotunes');
+    const usersCollection = db.collection("users");
+    const playlistCollection = db.collection("playlists");
+    const user = await usersCollection.findOne({ email: email });
+    let key = user.spotify_access;
+    const profileResponse = await fetch('https://api.spotify.com/v1/me', {
+      headers: {
+        'Authorization': `Bearer ${key}`
+      }
+    });
+    const profileData = await profileResponse.json();
+    if (profileData?.error?.message === "The access token expired" || profileData?.error?.message === "Invalid access token") {
+      key = await newUserKey(user.spotify_refresh);
+    }
+
+    const playlistResponse = await fetch(`https://api.spotify.com/v1/users/${user.spotify_id}/playlists`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: playlist.name, description: playlist.description })
+    })
+    const playlistData = await playlistResponse.json();
+    await playlistCollection.insertOne({ playlist_id: playlistData.id, name: playlistData.name, city: playlist.city, url: playlistData.external_urls.spotify, user: user.email });
+
+    const trackUris = playlist.tracks.map(track => track.uri);
+
+    if (trackUris.length > 0) {
+      const addTracksResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uris: trackUris })
+      });
+
+      const addTracksData = await addTracksResponse.json();
+      return res.status(200).json(addTracksData);
+    } else {
+      return res.status(200).json({ message: 'Playlist created without tracks.', playlist_id: playlistData.id });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create playlist.' });
+  }
+});
+
+app.get('/spotify/', async (req, res) => {
+  const city = req.query.city;
+  const db = client.db('geotunes');
+  const playlistCollection = db.collection('playlists');
+  const playlistResponse = await playlistCollection.find({ city: { $regex: city.trim(), $options: 'i' } });
+  const playlistData = await playlistResponse.toArray();
+  res.json(playlistData);
+});
+
 
 app.get('/add-song', (req, res) => {
   res.sendFile(path.join(__dirname, 'addSong', 'add-song.html'));
@@ -638,7 +766,7 @@ app.get('/api/feed', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-  
+
 app.post('/api/feed', async (req, res) => {
   try {
     const { city, content, username } = req.body;
@@ -696,7 +824,7 @@ app.post('/api/create-event', async (req, res) => {
     res.status(500).json({ error: "Failed to create event" });
   }
 });
-    
+
 app.use('/feed', express.static(path.join(__dirname, 'socialFeed')));
 
 app.get('/feed', (req, res) => {
