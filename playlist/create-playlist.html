@@ -6,43 +6,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GeoTunes Create Playlist</title>
   <link rel="stylesheet" href="/styles/global.css" />
-  <link rel="stylesheet" href="/styles/auth.css" />
+  <link rel="stylesheet" href="/styles/playlist.css" />
   <link rel="stylesheet" href="/styles/components.css" />
 </head>
 
 <body class="login-page">
-
-  <body>
-    <div id="header-root"></div>
-    <main class="login-main">
-      <div class="auth-container">
-        <div class="auth-form-wrapper">
-          <h1>Create Playlist</h1>
-          <div id="error-banner" role="alert" aria-live="assertive" class="error-banner" style="display:none;"></div>
-          <form id="login-form">
-            <div class="input-field">
-              <label for="playlistName">Playlist Name</label>
-              <input type="playlist" id="playlist" name="playlist" required />
+  <div id="header-root"></div>
+  <main class="login-main">
+    <div class="auth-container">
+      <div class="auth-form-wrapper">
+        <h1>Create Playlist</h1>
+        <div id="error-banner" role="alert" aria-live="assertive" class="error-banner" style="display:none;"></div>
+        <form id="create-playlist-form">
+          <div class="input-field">
+            <label for="playlistName">City</label>
+            <input type="text" id="city" name="playlist" required />
+          </div>
+          <div class="input-field">
+            <label for="playlistName">Playlist Name</label>
+            <input type="text" id="playlist" name="playlist" required />
+          </div>
+          <div class="input-field">
+            <label for="Playlist Description">Playlist Description</label>
+            <input type="text" id="description" name="description" required />
+          </div>
+          <div id="track-list">
+            <div class="track-entry input-field">
+              <input type="text" name="trackName" placeholder="Track name" required />
+              <input type="text" name="artistName" placeholder="Artist name" required />
             </div>
-            <div class="input-field">
-              <label for="Playlist Description">Playlist Description</label>
-              <input type="description" id="description" name="description" required />
-            </div>
-
-            <button type="submit" id="login-button">Submit</button>
-          </form>
-        </div>
+          </div>
+          <button type="button" id="add-track-btn">Add Another Track</button>
+          <input type="hidden" id="track-metadata" name="trackMetadata" />
+          <button type="submit" id="login-button">Submit</button>
+        </form>
       </div>
-    </main>
-    <div id="footer-root"></div>
+    </div>
+  </main>
+  <div id="footer-root"></div>
 
-    <script type="module" src="/user-auth/scripts/api.js"></script>
-    <script type="module" src="/user-auth/scripts/validation.js"></script>
-    <script type="module" src="/user-auth/scripts/authHelpers.js"></script>
-    <script type="module" src="/user-auth/scripts/login.js"></script>
-    <script type="module" src="/playlist/scripts/create-playlist.js"></script>
-    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-  </body>
+  <script type="module" src="/user-auth/scripts/api.js"></script>
+  <script type="module" src="/user-auth/scripts/validation.js"></script>
+  <script type="module" src="/user-auth/scripts/authHelpers.js"></script>
+  <script type="module" src="/user-auth/scripts/login.js"></script>
+  <script type="module" src="/playlist/scripts/create-playlist.js"></script>
+  <script type="module" src="/scripts/headerFooter.js"></script>
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+</body>
 
 </html>

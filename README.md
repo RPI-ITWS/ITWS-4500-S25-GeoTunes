@@ -52,6 +52,12 @@ Base URL: https://team4156208.eastus.cloudapp.azure.com/
 
 ---
 
+## Spotify Integration
+
+New accounts are redirected to spotify to connect their account to our website. This is necessary for creating playlists with integration for our project. Because the app is registered as in development with the spotify api, only accounts that we authorize are able to make api requests with our project. To test the creation feature, you can message us to add the email of your spotify account to our project's authorized users.
+
+---
+
 ## API Documentation
 
 ### Authentication Endpoints

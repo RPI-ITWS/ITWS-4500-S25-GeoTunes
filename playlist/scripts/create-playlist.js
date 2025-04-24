@@ -1,60 +1,84 @@
-import api from './api.js';
-import { validateLogin } from './validation.js';
-import { handleSuccessfulAuth } from './authHelpers.js';
+import { getCurrentUser } from '/user-auth/scripts/authHelpers.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('login-form');
+  const form = document.getElementById('create-playlist-form');
   const errorBanner = document.getElementById('error-banner');
-  const loginButton = document.getElementById('login-button');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    errorBanner.style.display = 'none';
-    document.getElementById('error-email').textContent = '';
-    document.getElementById('error-password').textContent = '';
+    const playlistName = document.getElementById('playlist').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const city = document.getElementById('city').value.trim();
 
-    const formData = {
-      email: form.email.value.trim(),
-      password: form.password.value.trim()
-    };
-
-    const errors = validateLogin(formData);
-    if (Object.keys(errors).length > 0) {
-      if (errors.email) {
-        document.getElementById('error-email').textContent = errors.email;
-      }
-      if (errors.password) {
-        document.getElementById('error-password').textContent = errors.password;
-      }
+    const user = getCurrentUser();
+    if (!user) {
+      showError("You must be logged in to create a playlist.");
       return;
     }
 
-    loginButton.disabled = true;
-    loginButton.innerHTML =
-      '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
+    const email = user.email;
+
+    // 🧠 Collect track & artist pairs
+    const trackEntries = document.querySelectorAll('.track-entry');
+    const tracks = [];
+
+    trackEntries.forEach(entry => {
+      const trackName = entry.querySelector('input[name="trackName"]').value.trim();
+      const artistName = entry.querySelector('input[name="artistName"]').value.trim();
+      if (trackName && artistName) {
+        tracks.push({ track: trackName, artist: artistName });
+      }
+    });
+
+    if (!playlistName || !description || tracks.length === 0) {
+      showError("Please complete all required fields and add at least one track.");
+      return;
+    }
+
+    const playlist = {
+      name: playlistName,
+      description,
+      city,
+      tracks
+    };
 
     try {
-      const userData = await api.post('/api/auth/login', formData);
-      console.log('Login successful:', userData);
+      const res = await fetch('/playlist/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, playlist })
+      });
 
-      handleSuccessfulAuth(userData);
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Failed to create playlist.');
+      }
+
+      window.location.href = '/'; // Or wherever you want to go next
     } catch (err) {
-      console.error('Login error:', err);
-      const responseErrors = err.response?.data?.errors || { general: 'Login failed' };
-      if (responseErrors.general) {
-        errorBanner.textContent = responseErrors.general;
-        errorBanner.style.display = 'block';
-      }
-      if (responseErrors.email) {
-        document.getElementById('error-email').textContent = responseErrors.email;
-      }
-      if (responseErrors.password) {
-        document.getElementById('error-password').textContent = responseErrors.password;
-      }
-    } finally {
-      loginButton.disabled = false;
-      loginButton.textContent = 'LOG IN';
+      showError(err.message || "Something went wrong.");
     }
   });
+
+  function showError(message) {
+    errorBanner.style.display = 'block';
+    errorBanner.textContent = message;
+  }
+
+  // Add track inputs
+  const addTrackBtn = document.getElementById('add-track-btn');
+  addTrackBtn.addEventListener('click', () => {
+    const newEntry = document.createElement('div');
+    newEntry.className = 'track-entry input-field';
+    newEntry.innerHTML = `
+      <input type="text" name="trackName" placeholder="Track name" required />
+      <input type="text" name="artistName" placeholder="Artist name" required />
+    `;
+    document.getElementById('track-list').appendChild(newEntry);
+  });
 });
+

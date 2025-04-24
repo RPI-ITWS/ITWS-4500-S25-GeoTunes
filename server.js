@@ -197,7 +197,6 @@ app.get('/profile', (req, res) => {
 app.use('/playlist', express.static(path.join(__dirname, 'playlist')));
 
 app.get('/create-playlist', (req, res) => {
-  console.log("Serving file from:", path.join(__dirname, 'playlist', 'create-playlist.html'));
   res.sendFile(path.join(__dirname, 'playlist', 'create-playlist.html'));
 })
 
@@ -474,7 +473,6 @@ app.get('/playlist/', async (req, res) => {
 
 app.post('/playlist/create', async (req, res) => {
   const { email, playlist } = req.body;
-
   try {
     const db = client.db('geotunes');
     const usersCollection = db.collection("users");
@@ -502,7 +500,19 @@ app.post('/playlist/create', async (req, res) => {
     const playlistData = await playlistResponse.json();
     await playlistCollection.insertOne({ playlist_id: playlistData.id, name: playlistData.name, city: playlist.city, url: playlistData.external_urls.spotify, user: user.email });
 
-    const trackUris = playlist.tracks.map(track => track.uri);
+    const trackUris = [];
+
+    for (const { track, artist } of playlist.tracks) {
+      const searchRes = await fetch(`https://api.spotify.com/v1/search?q=track:${encodeURIComponent(track)}%20artist:${encodeURIComponent(artist)}&type=track&limit=1`, {
+        headers: { 'Authorization': `Bearer ${key}` }
+      });
+
+      const searchData = await searchRes.json();
+      const uri = searchData?.tracks?.items?.[0]?.uri;
+      if (uri) {
+        trackUris.push(uri);
+      }
+    }
 
     if (trackUris.length > 0) {
       const addTracksResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`, {

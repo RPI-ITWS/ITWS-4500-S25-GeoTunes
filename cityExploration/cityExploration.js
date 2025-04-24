@@ -114,24 +114,7 @@ function CityExplorationApp() {
         .then((data) => {
           console.log(data);
           setTabContent(`
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
               <h4 style="margin: 0;">Spotify Playlists for ${cityName}</h4>
-              <a href="/create-playlist" style="
-                display: inline-block;
-                padding: 8px 16px;
-                background-color: #FF6B6B;
-                color: white;
-                border-radius: 8px;
-                text-decoration: none;
-                font-weight: bold;
-                font-family: 'Oleo Script', cursive;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-                transition: background 0.3s ease;
-                margin-top: 10px;
-              ">
-                Create New Event
-              </a>
-            </div>
             <div id='embed-container' style="margin-top: 20px;"></div>
           `);
           window.onSpotifyIframeApiReady = (IFrameAPI) => {
@@ -179,18 +162,18 @@ function CityExplorationApp() {
 
           data.events.forEach(event => {
             html += `
-                                <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-                                    <strong>${event.name}</strong><br>
-                                    <em>${event.date} at ${event.time}</em><br>
-                                    Location: ${event.location.address}<br>
-                                    Cost: ${event.cost}<br>
-                                    Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
-                                    <p style="margin-top: 5px;">${event.description}</p>
-                                    <button class="save-event-btn" data-id="${event._id}" style="margin-top: 10px; padding: 5px 10px; background-color: var(--emerald-green); color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                        Save
-                                    </button>
-                                </li>
-                            `;
+                    <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+                        <strong>${event.name}</strong><br>
+                        <em>${event.date} at ${event.time}</em><br>
+                        Location: ${event.location.address}<br>
+                        Cost: ${event.cost}<br>
+                        Contact: <a href="mailto:${event.contact}">${event.contact}</a><br>
+                        <p style="margin-top: 5px;">${event.description}</p>
+                        <button class="save-event-btn" data-id="${event._id}" style="margin-top: 10px; padding: 5px 10px; background-color: var(--emerald-green); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Save
+                        </button>
+                    </li>
+                `;
           });
 
           html += '</ul>';
@@ -259,18 +242,18 @@ function CityExplorationApp() {
     if (!trimmed) return;
 
     await fetch('/api/feed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            city: currentCity,
-            content: trimmed,
-            username: user?.name || 'Anonymous'
-        })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        city: currentCity,
+        content: trimmed,
+        username: user?.name || 'Anonymous'
+      })
     });
 
     setFeedInput('');
     fetchFeed(currentCity);
-  }  
+  }
 
 
   function handleTabClick(tab) {
@@ -420,7 +403,7 @@ function CityExplorationApp() {
       "div",
       { className: "bottom-buttons", style: { textAlign: "center", marginTop: "20px" } },
       React.createElement("a", {
-        href: "/add-song",
+        href: "/create-playlist",
         style: {
           display: "inline-block",
           padding: "0.75rem 1.5rem",
@@ -430,9 +413,9 @@ function CityExplorationApp() {
           margin: "0 10px",
           textDecoration: "none"
         }
-      }, "Add to Playlist"),
+      }, "Add a Playlist"),
       React.createElement("a", {
-        href: "/create-event",        
+        href: "/create-event",
         style: {
           display: "inline-block",
           padding: "0.75rem 1.5rem",
@@ -449,36 +432,36 @@ function CityExplorationApp() {
       { className: "social-feed", style: { marginTop: "30px" } },
       React.createElement("h3", null, `${currentCity || 'City'} Feed`),
       React.createElement("textarea", {
-          value: feedInput,
-          onChange: (e) => setFeedInput(e.target.value),
-          placeholder: `What's happening in ${currentCity || 'this city'}?`,
-          rows: 3,
-          style: { width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }
+        value: feedInput,
+        onChange: (e) => setFeedInput(e.target.value),
+        placeholder: `What's happening in ${currentCity || 'this city'}?`,
+        rows: 3,
+        style: { width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }
       }),
       React.createElement("button", {
-          onClick: postToFeed,
-          style: { marginTop: "10px", padding: "6px 12px", backgroundColor: "#FF6B6B", color: "white", border: "none", borderRadius: "4px" }
+        onClick: postToFeed,
+        style: { marginTop: "10px", padding: "6px 12px", backgroundColor: "#FF6B6B", color: "white", border: "none", borderRadius: "4px" }
       }, "Post"),
       feedPosts.length === 0
-          ? React.createElement("p", null, "No posts yet. Be the first to share!")
-          : feedPosts.map(post =>
-              React.createElement("div", {
-                  key: post._id,
-                  style: {
-                      marginTop: "15px",
-                      padding: "10px",
-                      border: "1px solid #eee",
-                      borderRadius: "6px",
-                      backgroundColor: "#fafafa"
-                  }
-              },
-                  React.createElement("strong", null, post.username || "Anonymous"),
-                  React.createElement("small", { style: { display: "block", color: "#888" } }, new Date(post.timestamp).toLocaleString()),
-                  React.createElement("p", null, post.content)
-              )
+        ? React.createElement("p", null, "No posts yet. Be the first to share!")
+        : feedPosts.map(post =>
+          React.createElement("div", {
+            key: post._id,
+            style: {
+              marginTop: "15px",
+              padding: "10px",
+              border: "1px solid #eee",
+              borderRadius: "6px",
+              backgroundColor: "#fafafa"
+            }
+          },
+            React.createElement("strong", null, post.username || "Anonymous"),
+            React.createElement("small", { style: { display: "block", color: "#888" } }, new Date(post.timestamp).toLocaleString()),
+            React.createElement("p", null, post.content)
           )
-  )      
-);      
+        )
+    )
+  );
 }
 
 
